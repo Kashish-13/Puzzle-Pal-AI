@@ -11,7 +11,8 @@ PuzzlePal AI is a full-stack, dual-experience cognitive platform built with Next
 
 During onboarding, users select their persona to personalize puzzles, language, categories, and feedback:
 
-### 🧒 1. Kids Experience ("Fun Puzzles & Brain Challenges")
+#
+## 🧒 1. Kids Experience ("Fun Puzzles & Brain Challenges")
 - **Audience**: Children and teenagers (age groups: 8–10, 11–13, 14–16).
 - **Goal**: Spark curiosity, build observation skills, and foster creative problem-solving.
 - **Categories**:
