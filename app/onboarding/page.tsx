@@ -87,7 +87,7 @@ export default function OnboardingPage() {
     { id: "business", label: "📈 Business Decisions", desc: "Startup prioritization, unit economics & strategy" },
     { id: "technical", label: "💻 Technical Challenges", desc: "Architecture bottlenecks & distributed systems" },
     { id: "data", label: "📊 Data Reasoning", desc: "Metrics interpretation, Simpson's paradox & anomalies" },
-    { id: "mystery", label: "🔍 Mystery & Deduction", desc: "Forensic timelines & timeline elimination" },
+    { id: "mystery", label: "🔍 Mystery & Deduction", desc: "Forensic clues & timeline elimination" },
     { id: "decision", label: "🎯 Crisis Decision Making", desc: "High-stakes mitigation & risk tradeoffs" },
     { id: "aptitude", label: "🔢 Light Aptitude", desc: "Placement reasoning, coding-decoding & sequences" },
     { id: "word", label: "🔤 Verbal Reasoning", desc: "Syllogistic logic & fallacy deconstruction" },
@@ -95,7 +95,7 @@ export default function OnboardingPage() {
 
   return (
     <ProtectedRoute>
-      <main className="min-h-screen bg-[#090d16] flex items-center justify-center p-4 py-12">
+      <main className="min-h-screen bg-[#090d16] flex items-center justify-center p-4 py-12 font-sans">
         <div className="w-full max-w-2xl bg-slate-900/90 rounded-3xl p-6 sm:p-10 border border-slate-800 shadow-2xl backdrop-blur-md">
           {/* Header */}
           <div className="text-center mb-8">
@@ -105,7 +105,9 @@ export default function OnboardingPage() {
                 PuzzlePal AI
               </span>
             </div>
-            <div className="flex items-center justify-center gap-2 mb-2">
+
+            {/* Step Indicators */}
+            <div className="flex items-center justify-center gap-2 mb-3">
               <span
                 className={`w-8 h-1.5 rounded-full transition-all ${
                   step === 1 ? "bg-indigo-500" : "bg-slate-700"
@@ -117,17 +119,49 @@ export default function OnboardingPage() {
                 }`}
               />
             </div>
-            <h1 className="text-2xl font-bold text-slate-100">
-              {step === 1 ? "Who is PuzzlePal for you?" : "Tailor Your Challenges"}
+
+            <h1 className="text-2xl font-black text-slate-100">
+              {step === 1 ? "Welcome to PuzzlePal AI" : "Tailor Your Challenge Experience"}
             </h1>
-            <p className="text-xs text-slate-400 mt-1 font-medium">
+            <p className="text-xs text-slate-400 mt-1.5 font-medium max-w-md mx-auto leading-relaxed">
               {step === 1
-                ? "Choose your path to personalize puzzles, difficulty, and rewards"
+                ? "The interactive learning platform that evaluates how you think — not just whether you got it right or wrong."
                 : selectedType === "kids"
-                ? "Tell us your age and what puzzles make your brain happy!"
-                : "Select your background and high-impact areas of reasoning"}
+                ? "Tell us your age and pick what puzzle themes spark your curiosity!"
+                : "Select your career stage and choose the analytical domains you want to sharpen."}
             </p>
           </div>
+
+          {/* Educational Concept Pill on Step 1 */}
+          {step === 1 && (
+            <div className="mb-6 p-4 rounded-2xl border border-slate-800 bg-slate-950/60 text-xs text-slate-300 space-y-2">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-400 block">
+                How It Works:
+              </span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                <div className="p-2 rounded-xl bg-slate-900/80 border border-slate-800/80">
+                  <span className="text-lg block">🧩</span>
+                  <span className="font-bold text-slate-200 block mt-0.5">1. Challenge</span>
+                  <span className="text-[10px] text-slate-500">Real-world scenario</span>
+                </div>
+                <div className="p-2 rounded-xl bg-slate-900/80 border border-slate-800/80">
+                  <span className="text-lg block">✏️</span>
+                  <span className="font-bold text-slate-200 block mt-0.5">2. Reason</span>
+                  <span className="text-[10px] text-slate-500">Explain your thinking</span>
+                </div>
+                <div className="p-2 rounded-xl bg-slate-900/80 border border-slate-800/80">
+                  <span className="text-lg block">🤖</span>
+                  <span className="font-bold text-slate-200 block mt-0.5">3. AI Feedback</span>
+                  <span className="text-[10px] text-slate-500">4-dimension score</span>
+                </div>
+                <div className="p-2 rounded-xl bg-slate-900/80 border border-slate-800/80">
+                  <span className="text-lg block">🏆</span>
+                  <span className="font-bold text-slate-200 block mt-0.5">4. Level Up</span>
+                  <span className="text-[10px] text-slate-500">Earn XP & badges</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {error && (
             <div className="mb-6 p-3.5 rounded-xl bg-rose-950/60 border border-rose-800/60 text-rose-300 text-xs font-semibold flex items-center gap-2">
@@ -153,7 +187,7 @@ export default function OnboardingPage() {
                   <div className="text-4xl mb-3">🧒</div>
                   <div className="flex items-center justify-between mb-1">
                     <h2 className="text-lg font-bold text-slate-100 group-hover:text-amber-300 transition-colors">
-                      KIDS
+                      KIDS EXPERIENCE
                     </h2>
                     {selectedType === "kids" && (
                       <span className="text-xs font-bold text-amber-400 bg-amber-500/20 px-2 py-0.5 rounded-full">
@@ -161,11 +195,11 @@ export default function OnboardingPage() {
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-amber-200/80 font-semibold mb-2">
-                    &ldquo;Fun puzzles, creativity & brain challenges&rdquo;
-                  </p>
+                  <div className="text-xs font-mono font-bold text-amber-300 mb-2">
+                    PLAY → SOLVE → LEARN → REWARD
+                  </div>
                   <p className="text-xs text-slate-400 leading-relaxed">
-                    Designed for young minds. Fun detective mysteries, colorful patterns, creative inventions, and friendly math riddles with positive feedback.
+                    Designed for young minds. Fun detective mysteries, colorful patterns, creative inventions, and friendly math riddles with positive, encouraging feedback!
                   </p>
                 </button>
 
@@ -190,9 +224,9 @@ export default function OnboardingPage() {
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-indigo-300/80 font-semibold mb-2">
-                    &ldquo;Logic, reasoning, creativity & real-world thinking&rdquo;
-                  </p>
+                  <div className="text-xs font-mono font-bold text-indigo-300 mb-2">
+                    THINK → SOLVE → ANALYZE → IMPROVE
+                  </div>
                   <p className="text-xs text-slate-400 leading-relaxed">
                     Designed for college students, developers, and young professionals. Tackle interview trade-offs, architecture puzzles, data anomalies, and logic.
                   </p>

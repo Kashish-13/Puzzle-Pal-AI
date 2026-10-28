@@ -142,17 +142,21 @@ export default function ProfilePage() {
           <div className="border-b border-slate-800 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                <Link href="/dashboard" className="hover:text-slate-200">
-                  Dashboard
+                <Link href="/dashboard" className="hover:text-slate-200 transition-colors">
+                  {isKids ? "Home" : "Dashboard"}
                 </Link>
                 <span>/</span>
-                <span className="text-indigo-400">Profile & Settings</span>
+                <span className={isKids ? "text-amber-400 font-bold" : "text-indigo-400"}>
+                  {isKids ? "Explorer Profile" : "Profile & Settings"}
+                </span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight mt-1">
                 {profile?.fullName || "Your Profile"}
               </h1>
-              <p className="text-xs sm:text-sm text-slate-400 mt-1">
-                Manage your analytical identity, review badges, and customize your puzzle experience.
+              <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
+                {isKids
+                  ? "Track your detective badges, puzzle achievements, and explorer ranking!"
+                  : "Manage your analytical identity, review earned milestone credentials, and calibrate challenge settings."}
               </p>
             </div>
 
@@ -160,9 +164,15 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => (isEditing ? setIsEditing(false) : handleStartEditing())}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition-colors"
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  isEditing
+                    ? "bg-slate-800 text-slate-200"
+                    : isKids
+                    ? "bg-amber-400 hover:bg-amber-300 text-slate-950 font-black shadow-xs shadow-amber-500/20"
+                    : "bg-slate-800 hover:bg-slate-700 text-slate-200"
+                }`}
               >
-                {isEditing ? "Cancel Editing" : "Edit Profile ✏️"}
+                {isEditing ? "Cancel Editing" : isKids ? "Edit Explorer ✏️" : "Edit Profile ✏️"}
               </button>
               <button
                 type="button"
@@ -175,9 +185,9 @@ export default function ProfilePage() {
           </div>
 
           {saveSuccess && (
-            <div className="p-4 rounded-xl bg-emerald-950/60 border border-emerald-800/60 text-emerald-300 text-xs font-semibold flex items-center gap-2">
+            <div className="p-4 rounded-xl bg-emerald-950/60 border border-emerald-800/60 text-emerald-300 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
               <span>✓</span>
-              <span>Profile updated successfully in Firestore!</span>
+              <span>Profile preferences updated successfully!</span>
             </div>
           )}
 
@@ -190,7 +200,7 @@ export default function ProfilePage() {
 
           {/* Edit Profile Form */}
           {isEditing && (
-            <form onSubmit={handleSaveProfile} className="rounded-2xl border border-indigo-500/50 bg-slate-900/90 p-6 sm:p-8 space-y-6 shadow-xl backdrop-blur-md">
+            <form onSubmit={handleSaveProfile} className="rounded-3xl border border-indigo-500/50 bg-slate-900/90 p-6 sm:p-8 space-y-6 shadow-xl backdrop-blur-md">
               <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2">
                 <span>✏️</span>
                 <span>Edit Profile Information</span>
@@ -302,7 +312,9 @@ export default function ProfilePage() {
                         onClick={() => toggleInterest(opt.id)}
                         className={`py-2 px-3 rounded-xl border text-xs font-semibold text-left transition-all ${
                           isSelected
-                            ? "bg-indigo-500/20 border-indigo-400 text-indigo-300"
+                            ? editUserType === "kids"
+                              ? "bg-amber-500/20 border-amber-400 text-amber-200"
+                              : "bg-indigo-500/20 border-indigo-400 text-indigo-300"
                             : "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200"
                         }`}
                       >
@@ -333,18 +345,27 @@ export default function ProfilePage() {
           )}
 
           {/* Account Overview Card */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 sm:p-8 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className={`rounded-3xl border p-6 sm:p-8 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-6 ${
+            isKids
+              ? "bg-gradient-to-r from-amber-950/30 via-slate-900 to-slate-900 border-amber-500/30"
+              : "bg-slate-900/60 border-slate-800"
+          }`}>
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-indigo-950/80 border border-indigo-700/60 flex items-center justify-center text-3xl shrink-0">
+              <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shrink-0 border ${
+                isKids
+                  ? "bg-amber-950/80 border-amber-500/40 text-amber-300"
+                  : "bg-indigo-950/80 border-indigo-700/60 text-indigo-300"
+              }`}>
                 {isKids ? "🧒" : "🎓"}
               </div>
               <div>
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <h2 className="text-xl font-black text-white flex items-center gap-2">
                   <span>{profile?.fullName || user?.email?.split("@")[0]}</span>
-                  <span className="text-xs font-normal text-slate-400">({user?.email})</span>
                 </h2>
                 <div className="flex flex-wrap items-center gap-2 mt-1 text-xs font-mono text-slate-400">
-                  <span className="text-indigo-400 font-semibold">{levelTitle}</span>
+                  <span className={`font-bold ${isKids ? "text-amber-400" : "text-indigo-400"}`}>
+                    {levelTitle} (Level {level})
+                  </span>
                   <span>•</span>
                   <span>{isKids ? `Age: ${profile?.ageRange || "8–13"}` : profile?.academicLevel || "Student / Pro"}</span>
                   <span>•</span>
@@ -354,12 +375,12 @@ export default function ProfilePage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
+              <span className={`px-3.5 py-1.5 rounded-full text-xs font-bold border ${
                 isKids
                   ? "bg-amber-500/10 border-amber-400/40 text-amber-300"
                   : "bg-indigo-500/10 border-indigo-400/40 text-indigo-300"
               }`}>
-                {isKids ? "🧒 Kids Mode Active" : "🎓 Student Mode Active"}
+                {isKids ? "🧒 Kids Explorer Mode Active" : "🎓 Student Mode Active"}
               </span>
             </div>
           </div>
@@ -369,7 +390,7 @@ export default function ProfilePage() {
             <StatsCard
               label={isKids ? "Average Star Score" : "Reasoning Score"}
               value={reasoningScore > 0 ? `${reasoningScore.toFixed(1)} / 10` : "—"}
-              subtext="Average score"
+              subtext={isKids ? "Overall puzzle score" : "Weighted average score"}
               icon={isKids ? "⭐" : "🧠"}
             />
             <StatsCard
@@ -379,10 +400,10 @@ export default function ProfilePage() {
               icon="⚡"
             />
             <StatsCard
-              label="Completions"
+              label={isKids ? "Puzzles Solved" : "Completions"}
               value={`${challengesSolved}`}
-              subtext="Total puzzles solved"
-              icon="🎯"
+              subtext="Lifetime completions"
+              icon={isKids ? "🏆" : "🎯"}
             />
             <StatsCard
               label="Active Streak"
@@ -395,16 +416,22 @@ export default function ProfilePage() {
           {/* Level Progress */}
           <ProgressBar xp={xp} level={level} levelTitle={levelTitle} userType={userType} />
 
-          {/* Trophies & Badges Collection */}
-          <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 backdrop-blur-xs">
+          {/* Trophies & Badges Collection (Supports #trophies hash link from Kids Navbar) */}
+          <section id="trophies" className={`rounded-3xl border p-6 backdrop-blur-xs scroll-mt-20 ${
+            isKids
+              ? "border-amber-500/30 bg-slate-900/70"
+              : "border-slate-800 bg-slate-900/60"
+          }`}>
             <h3 className="text-base font-bold text-slate-100 mb-1 flex items-center gap-2">
-              <span>{isKids ? "Your Trophy Case 🏆" : "Reasoning Badges & Accomplishments 🎖️"}</span>
+              <span>{isKids ? "Your Detective Trophy Case 🏆" : "Reasoning Badges & Accomplishments 🎖️"}</span>
               <span className="text-xs text-slate-400 font-normal">
                 ({(profile?.badges || []).length} / {AVAILABLE_BADGES.length} Unlocked)
               </span>
             </h3>
             <p className="text-xs text-slate-400 mb-6">
-              Milestone badges earned through deductive accuracy, active streaks, and cognitive exploration.
+              {isKids
+                ? "Unlock new trophies by solving puzzles, finding clues, and keeping your daily streak alive!"
+                : "Milestone badges earned through deductive accuracy, active streaks, and cognitive exploration."}
             </p>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
@@ -413,9 +440,11 @@ export default function ProfilePage() {
                 return (
                   <div
                     key={b.id}
-                    className={`p-4 rounded-xl border text-center transition-all ${
+                    className={`p-4 rounded-2xl border text-center transition-all ${
                       isUnlocked
-                        ? "bg-slate-950/90 border-indigo-500/40 text-slate-100 shadow-xs"
+                        ? isKids
+                          ? "bg-slate-950/90 border-amber-400/60 text-slate-100 shadow-md shadow-amber-500/5 ring-1 ring-amber-400/30"
+                          : "bg-slate-950/90 border-indigo-500/40 text-slate-100 shadow-xs ring-1 ring-indigo-500/20"
                         : "bg-slate-950/40 border-slate-800/50 text-slate-600 opacity-50"
                     }`}
                   >
@@ -428,8 +457,10 @@ export default function ProfilePage() {
                       <span
                         className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                           isUnlocked
-                            ? "bg-emerald-500/20 text-emerald-300"
-                            : "bg-slate-800 text-slate-500"
+                            ? isKids
+                              ? "bg-amber-500/20 text-amber-300 font-mono"
+                              : "bg-emerald-500/20 text-emerald-300 font-mono"
+                            : "bg-slate-800 text-slate-500 font-mono"
                         }`}
                       >
                         {isUnlocked ? "Unlocked ✓" : "Locked"}
@@ -442,12 +473,14 @@ export default function ProfilePage() {
           </section>
 
           {/* Category Strengths Matrix */}
-          <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 backdrop-blur-xs">
+          <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 backdrop-blur-xs">
             <h3 className="text-base font-bold text-slate-100 mb-1">
-              Category Competency Breakdown
+              {isKids ? "Your Puzzle Strengths Breakdown ⭐" : "Cognitive Domain Competency Breakdown"}
             </h3>
             <p className="text-xs text-slate-400 mb-6">
-              Calculated dynamically from your completed challenge reasoning scores.
+              {isKids
+                ? "See how well you solved each puzzle theme based on your detective scores!"
+                : "Calculated dynamically from your completed challenge reasoning scores."}
             </p>
 
             {loadingStrengths ? (
@@ -459,7 +492,7 @@ export default function ProfilePage() {
                   return (
                     <div
                       key={cs.category}
-                      className="p-4 rounded-xl border border-slate-800/80 bg-slate-950/50 space-y-2"
+                      className="p-4 rounded-2xl border border-slate-800/80 bg-slate-950/50 space-y-2"
                     >
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-bold text-slate-200 flex items-center gap-2">
@@ -484,7 +517,7 @@ export default function ProfilePage() {
                             pct >= 80
                               ? "bg-emerald-500"
                               : pct >= 60
-                              ? "bg-indigo-500"
+                              ? isKids ? "bg-amber-400" : "bg-indigo-500"
                               : pct > 0
                               ? "bg-amber-500"
                               : "bg-slate-800"
@@ -500,13 +533,13 @@ export default function ProfilePage() {
           </section>
 
           {/* Telemetry & Security Footprint */}
-          <section className="rounded-2xl border border-slate-800/60 bg-slate-950/40 p-6 text-xs text-slate-400 space-y-2">
+          <section className="rounded-3xl border border-slate-800/60 bg-slate-950/40 p-6 text-xs text-slate-400 space-y-2">
             <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">
               Account Security & Telemetry
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono">
               <div>
-                <span className="text-slate-500">Firebase UID:</span>{" "}
+                <span className="text-slate-500">Account UID:</span>{" "}
                 <span className="text-slate-300">{user?.uid || "—"}</span>
               </div>
               <div>
@@ -518,7 +551,7 @@ export default function ProfilePage() {
                 <span className="text-slate-300">Firebase Firestore (Protected)</span>
               </div>
               <div>
-                <span className="text-slate-500">AI Engine:</span>{" "}
+                <span className="text-slate-500">AI Reasoning Engine:</span>{" "}
                 <span className="text-slate-300">OpenAI Server API + Fallback</span>
               </div>
             </div>
