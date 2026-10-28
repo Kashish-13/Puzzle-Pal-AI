@@ -6,15 +6,19 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Navbar from "@/components/Navbar";
 import ProgressBar from "@/components/ProgressBar";
 import StatsCard from "@/components/StatsCard";
-import LoadingState from "@/components/LoadingState";
+import Icon, { CategoryIcon } from "@/components/Icon";
+import AchievementGrid from "@/components/AchievementGrid";
+import RecentActivityList from "@/components/RecentActivityList";
+import { CATEGORY_TONE, TONES } from "@/components/tokens";
 import { useAuth } from "@/lib/auth";
 import {
   getUserCategoryStrengths,
   updateUserProfile,
   getLevelTitle,
   AVAILABLE_BADGES,
+  getChallengeHistory,
 } from "@/lib/firestore";
-import { CategoryStrength, UserType } from "@/lib/types";
+import { CategoryStrength, ChallengeHistoryRecord, UserType } from "@/lib/types";
 
 export default function ProfilePage() {
   const { user, profile, refreshProfile, updateProfileLocally, logout } = useAuth();
@@ -123,180 +127,164 @@ export default function ProfilePage() {
 
   const interestOptions = editUserType === "kids"
     ? [
-        { id: "kids_mystery", label: "🔍 Detective & Mystery" },
-        { id: "kids_brain_teaser", label: "⚡ Brain Teasers & Riddles" },
-        { id: "kids_pattern", label: "🌀 Patterns & Sequences" },
-        { id: "kids_math", label: "🔢 Fun Math Puzzles" },
-        { id: "kids_creative", label: "💡 Creative Thinking" },
-        { id: "kids_word", label: "🔤 Word Games" },
+        { id: "kids_mystery", label: "Detective & Mystery" },
+        { id: "kids_brain_teaser", label: "Brain Teasers & Riddles" },
+        { id: "kids_pattern", label: "Patterns & Sequences" },
+        { id: "kids_math", label: "Fun Math Puzzles" },
+        { id: "kids_creative", label: "Creative Thinking" },
+        { id: "kids_word", label: "Word Games" },
       ]
     : [
-        { id: "logic", label: "🧩 Logic & Lateral Thinking" },
-        { id: "business", label: "📈 Business Decisions" },
-        { id: "technical", label: "💻 Technical Challenges" },
-        { id: "data", label: "📊 Data Reasoning" },
-        { id: "mystery", label: "🔍 Mystery & Deduction" },
-        { id: "decision", label: "🎯 Decision Making" },
-        { id: "aptitude", label: "🔢 Light Aptitude" },
-        { id: "word", label: "🔤 Verbal Reasoning" },
+        { id: "logic", label: "Logic & Lateral Thinking" },
+        { id: "business", label: "Business Decisions" },
+        { id: "technical", label: "Technical Challenges" },
+        { id: "data", label: "Data Reasoning" },
+        { id: "mystery", label: "Mystery & Deduction" },
+        { id: "decision", label: "Decision Making" },
+        { id: "aptitude", label: "Light Aptitude" },
+        { id: "word", label: "Verbal Reasoning" },
       ];
+
+  // Recent activity (read-only, same source as the dashboard)
+  const [recent, setRecent] = useState<ChallengeHistoryRecord[]>([]);
+  useEffect(() => {
+    if (!user) return;
+    let ignore = false;
+    getChallengeHistory(user.uid)
+      .then((history) => {
+        if (!ignore) setRecent(history.slice(0, 3));
+      })
+      .catch((err) => console.error("Failed to load recent activity:", err));
+    return () => {
+      ignore = true;
+    };
+  }, [user]);
+
+  const displayName = profile?.fullName || user?.email?.split("@")[0] || "";
+  const unlockedBadges = profile?.badges || [];
+  const unlockedPct = Math.round((unlockedBadges.length / AVAILABLE_BADGES.length) * 100);
+  const radius = isKids ? "rounded-3xl" : "rounded-2xl";
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col font-sans">
+      <div className="min-h-screen bg-slate-50 text-ink flex flex-col">
         <Navbar />
 
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 space-y-8">
+        <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-10 page-enter">
           {/* Header */}
-          <div className="border-b border-slate-800 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                <Link href="/dashboard" className="hover:text-slate-200 transition-colors">
+              <nav className="flex items-center gap-1.5 text-sm text-slate-500" aria-label="Breadcrumb">
+                <Link href="/dashboard" className="hover:text-ink transition-colors">
                   {isKids ? "Home" : "Dashboard"}
                 </Link>
-                <span>/</span>
-                <span className={isKids ? "text-amber-400 font-bold" : "text-indigo-400"}>
-                  {isKids ? "Explorer Profile" : "Profile & Settings"}
-                </span>
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight mt-1">
-                {profile?.fullName || "Your Profile"}
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
-                {isKids
-                  ? "Track your detective badges, puzzle achievements, and explorer ranking!"
-                  : "Manage your analytical identity, review earned milestone credentials, and calibrate challenge settings."}
-              </p>
+                <span className="text-slate-300">/</span>
+                <span className="text-slate-700">Profile</span>
+              </nav>
+              <h1 className="mt-2 text-2xl sm:text-3xl font-semibold tracking-tight text-ink">Your profile</h1>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={() => (isEditing ? setIsEditing(false) : handleStartEditing())}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                  isEditing
-                    ? "bg-slate-800 text-slate-200"
-                    : isKids
-                    ? "bg-amber-400 hover:bg-amber-300 text-slate-950 font-black shadow-xs shadow-amber-500/20"
-                    : "bg-slate-800 hover:bg-slate-700 text-slate-200"
-                }`}
+                className="btn btn-secondary"
               >
-                {isEditing ? "Cancel Editing" : isKids ? "Edit Explorer ✏️" : "Edit Profile ✏️"}
+                {isEditing ? "Cancel editing" : "Edit profile"}
               </button>
-              <button
-                type="button"
-                onClick={() => logout()}
-                className="px-4 py-2 rounded-xl border border-slate-800 hover:border-rose-800/80 hover:bg-rose-950/40 text-xs font-semibold text-slate-400 hover:text-rose-300 transition-colors"
-              >
-                Sign Out
-              </button>
+              <Link href="/history" className="btn btn-primary">
+                Review progress
+                <Icon name="arrowRight" className="w-4 h-4" />
+              </Link>
             </div>
           </div>
 
-          {saveSuccess && (
-            <div className="p-4 rounded-xl bg-emerald-950/60 border border-emerald-800/60 text-emerald-300 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
-              <span>✓</span>
-              <span>Profile preferences updated successfully!</span>
-            </div>
-          )}
-
-          {saveError && (
-            <div className="p-4 rounded-xl bg-rose-950/60 border border-rose-800/60 text-rose-300 text-xs font-semibold flex items-center gap-2">
-              <span>⚠️</span>
-              <span>{saveError}</span>
+          {(saveSuccess || saveError) && (
+            <div className="-mt-4 space-y-3">
+              {saveSuccess && (
+                <div role="status" className="p-3 rounded-xl bg-green-50 border border-green-200 text-green-800 text-sm flex items-center gap-2 animate-fade-up">
+                  <Icon name="checkCircle" className="w-4 h-4" />
+                  <span>Profile updated.</span>
+                </div>
+              )}
+              {saveError && (
+                <div role="alert" className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center gap-2">
+                  <Icon name="alertCircle" className="w-4 h-4" />
+                  <span>{saveError}</span>
+                </div>
+              )}
             </div>
           )}
 
           {/* Edit Profile Form */}
           {isEditing && (
-            <form onSubmit={handleSaveProfile} className="rounded-3xl border border-indigo-500/50 bg-slate-900/90 p-6 sm:p-8 space-y-6 shadow-xl backdrop-blur-md">
-              <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-                <span>✏️</span>
-                <span>Edit Profile Information</span>
-              </h2>
+            <form onSubmit={handleSaveProfile} className="panel p-6 sm:p-8 space-y-6 animate-fade-up">
+              <h2 className="text-base font-semibold text-ink">Edit profile</h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-                    Full Name
+                  <label htmlFor="editFullName" className="label">
+                    Full name
                   </label>
                   <input
+                    id="editFullName"
                     type="text"
                     value={editFullName}
                     onChange={(e) => setEditFullName(e.target.value)}
-                    placeholder="Your Full Name"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-indigo-500 text-slate-100 text-sm font-medium"
+                    placeholder="Your full name"
+                    className="input"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-                    User Persona Mode
-                  </label>
+                  <span className="label">Mode</span>
                   <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setEditUserType("kids")}
-                      className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all ${
-                        editUserType === "kids"
-                          ? "bg-amber-500/20 border-amber-400 text-amber-300 ring-1 ring-amber-400"
-                          : "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200"
-                      }`}
-                    >
-                      🧒 Kids Mode
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setEditUserType("student")}
-                      className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all ${
-                        editUserType === "student"
-                          ? "bg-indigo-500/20 border-indigo-400 text-indigo-300 ring-1 ring-indigo-400"
-                          : "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200"
-                      }`}
-                    >
-                      🎓 Student Mode
-                    </button>
+                    {(["kids", "student"] as UserType[]).map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setEditUserType(type)}
+                        className={`option py-2.5 px-3 text-sm font-medium flex items-center justify-center gap-2 ${
+                          editUserType === type ? "option-selected text-brand-700" : "text-slate-700"
+                        }`}
+                      >
+                        <Icon name={type === "kids" ? "smile" : "graduationCap"} className="w-4 h-4" />
+                        {type === "kids" ? "Kids" : "Student"}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
 
               {editUserType === "kids" ? (
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-                    Age Range
-                  </label>
-                  <div className="grid grid-cols-3 gap-3">
+                  <span className="label">Age range</span>
+                  <div className="grid grid-cols-3 gap-2">
                     {["8–10", "11–13", "14–16"].map((age) => (
                       <button
                         key={age}
                         type="button"
                         onClick={() => setEditAgeRange(age)}
-                        className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all ${
-                          editAgeRange === age
-                            ? "bg-amber-500/20 border-amber-400 text-amber-300"
-                            : "bg-slate-950 border-slate-800 text-slate-400"
+                        className={`option py-2.5 px-3 text-sm text-center font-medium ${
+                          editAgeRange === age ? "option-selected text-brand-700" : "text-slate-700"
                         }`}
                       >
-                        {age} Years
+                        {age} years
                       </button>
                     ))}
                   </div>
                 </div>
               ) : (
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-                    Academic / Career Stage
-                  </label>
-                  <div className="grid grid-cols-3 gap-3">
+                  <span className="label">Academic or career stage</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {["High School", "College / Undergrad", "Early Career"].map((stage) => (
                       <button
                         key={stage}
                         type="button"
                         onClick={() => setEditAcademicLevel(stage)}
-                        className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all ${
-                          editAcademicLevel === stage
-                            ? "bg-indigo-500/20 border-indigo-400 text-indigo-300"
-                            : "bg-slate-950 border-slate-800 text-slate-400"
+                        className={`option py-2.5 px-3 text-sm text-center font-medium ${
+                          editAcademicLevel === stage ? "option-selected text-brand-700" : "text-slate-700"
                         }`}
                       >
                         {stage}
@@ -306,264 +294,209 @@ export default function ProfilePage() {
                 </div>
               )}
 
-              {/* Interests multi-select */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                  Favorite Categories / Focus Areas
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <span className="label">Focus areas</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                   {interestOptions.map((opt) => {
                     const isSelected = editInterests.includes(opt.id);
                     return (
                       <button
                         key={opt.id}
                         type="button"
+                        aria-pressed={isSelected}
                         onClick={() => toggleInterest(opt.id)}
-                        className={`py-2 px-3 rounded-xl border text-xs font-semibold text-left transition-all ${
-                          isSelected
-                            ? editUserType === "kids"
-                              ? "bg-amber-500/20 border-amber-400 text-amber-200"
-                              : "bg-indigo-500/20 border-indigo-400 text-indigo-300"
-                            : "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200"
+                        className={`option py-2.5 px-3 text-sm flex items-center justify-between gap-2 ${
+                          isSelected ? "option-selected text-ink" : "text-slate-700"
                         }`}
                       >
-                        {opt.label} {isSelected && "✓"}
+                        <span>{opt.label}</span>
+                        {isSelected && <Icon name="check" className="w-4 h-4 text-brand-600" />}
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(false)}
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-slate-200"
-                >
+              <div className="flex items-center justify-end gap-2 pt-6 border-t border-slate-100">
+                <button type="button" onClick={() => setIsEditing(false)} className="btn btn-ghost">
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-bold text-xs text-white shadow-lg disabled:opacity-50"
-                >
-                  {saving ? "Saving Changes..." : "Save Profile Changes"}
+                <button type="submit" disabled={saving} className="btn btn-primary">
+                  {saving ? "Saving..." : "Save changes"}
                 </button>
               </div>
             </form>
           )}
 
-          {/* Account Overview Card */}
-          <div className={`rounded-3xl border p-6 sm:p-8 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-6 ${
-            isKids
-              ? "bg-gradient-to-r from-amber-950/30 via-slate-900 to-slate-900 border-amber-500/30"
-              : "bg-slate-900/60 border-slate-800"
-          }`}>
-            <div className="flex items-center gap-4">
-              <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shrink-0 border ${
-                isKids
-                  ? "bg-amber-950/80 border-amber-500/40 text-amber-300"
-                  : "bg-indigo-950/80 border-indigo-700/60 text-indigo-300"
-              }`}>
-                {isKids ? "🧒" : "🎓"}
-              </div>
-              <div>
-                <h2 className="text-xl font-black text-white flex items-center gap-2">
-                  <span>{profile?.fullName || user?.email?.split("@")[0]}</span>
-                </h2>
-                <div className="flex flex-wrap items-center gap-2 mt-1 text-xs font-mono text-slate-400">
-                  <span className={`font-bold ${isKids ? "text-amber-400" : "text-indigo-400"}`}>
-                    {levelTitle} (Level {level})
+          {/* Profile information */}
+          <section className={`panel ${radius} overflow-hidden`}>
+            <div className={`h-20 ${isKids ? "bg-gradient-to-r from-sky-100 via-brand-100 to-amber-100" : "bg-gradient-to-r from-brand-600 to-brand-500"}`} />
+            <div className="px-6 pb-6 -mt-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div className="flex items-end gap-4">
+                <span className="w-16 h-16 rounded-2xl bg-white p-1 shadow-card shrink-0">
+                  <span className="w-full h-full rounded-xl bg-brand-600 text-white text-2xl font-semibold flex items-center justify-center">
+                    {displayName.charAt(0).toUpperCase() || "?"}
                   </span>
-                  <span>•</span>
-                  <span>{isKids ? `Age: ${profile?.ageRange || "8–13"}` : profile?.academicLevel || "Student / Pro"}</span>
-                  <span>•</span>
-                  <span>Adaptive: <span className="uppercase font-bold text-slate-300">{difficulty}</span></span>
+                </span>
+                <div className="pb-0.5 min-w-0">
+                  <h2 className="text-lg font-semibold text-ink truncate">{displayName}</h2>
+                  <p className="text-sm text-slate-500">
+                    {levelTitle} · {isKids ? `Age ${profile?.ageRange || "8–13"}` : profile?.academicLevel || "Student / Pro"} · Adaptive{" "}
+                    <span className="capitalize">{difficulty}</span>
+                  </p>
                 </div>
               </div>
+              <Link
+                href="/onboarding"
+                className="inline-flex items-center gap-2 self-start sm:self-auto rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:border-slate-300 transition-colors"
+                title="Switch between Kids and Student learning modes"
+              >
+                <Icon name={isKids ? "smile" : "graduationCap"} className={`w-4 h-4 ${isKids ? "text-sky-600" : "text-brand-600"}`} />
+                {isKids ? "Kids mode" : "Student mode"}
+                <Icon name="arrowLeftRight" className="w-3.5 h-3.5 text-slate-400" />
+              </Link>
             </div>
+          </section>
 
-            <div className="flex items-center gap-2">
-              <span className={`px-3.5 py-1.5 rounded-full text-xs font-bold border ${
-                isKids
-                  ? "bg-amber-500/10 border-amber-400/40 text-amber-300"
-                  : "bg-indigo-500/10 border-indigo-400/40 text-indigo-300"
-              }`}>
-                {isKids ? "🧒 Kids Explorer Mode Active" : "🎓 Student Mode Active"}
-              </span>
+          {/* Metrics + level */}
+          <section className="space-y-3">
+            <StatsCard
+              playful={isKids}
+              items={[
+                { label: "Level", value: level, subtext: levelTitle, icon: "layers", tone: "brand" },
+                { label: "XP", value: xp, subtext: "Lifetime experience", icon: "zap", tone: "amber" },
+                { label: "Streak", value: `${currentStreak}d`, subtext: "Consecutive days", icon: "flame", tone: isKids ? "sky" : "blue" },
+                { label: isKids ? "Puzzles solved" : "Solved", value: challengesSolved, subtext: "All time", icon: "checkCircle", tone: "green" },
+                {
+                  label: isKids ? "Star score" : "Avg. score",
+                  value: reasoningScore > 0 ? reasoningScore.toFixed(1) : "—",
+                  subtext: "Out of 10",
+                  icon: "activity",
+                  tone: "brand",
+                },
+              ]}
+            />
+            <div className={`panel ${radius} p-5 sm:p-6`}>
+              <ProgressBar xp={xp} level={level} levelTitle={levelTitle} userType={userType} />
             </div>
-          </div>
+          </section>
 
-          {/* 4 Primary Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatsCard
-              label={isKids ? "Average Star Score" : "Reasoning Score"}
-              value={reasoningScore > 0 ? `${reasoningScore.toFixed(1)} / 10` : "—"}
-              subtext={isKids ? "Overall puzzle score" : "Weighted average score"}
-              icon={isKids ? "⭐" : "🧠"}
-            />
-            <StatsCard
-              label="Total Experience"
-              value={`${xp} XP`}
-              subtext={`Level ${level} Progress`}
-              icon="⚡"
-            />
-            <StatsCard
-              label={isKids ? "Puzzles Solved" : "Completions"}
-              value={`${challengesSolved}`}
-              subtext="Lifetime completions"
-              icon={isKids ? "🏆" : "🎯"}
-            />
-            <StatsCard
-              label="Active Streak"
-              value={`${currentStreak} Days`}
-              subtext="Consecutive days active"
-              icon="🔥"
-            />
-          </div>
-
-          {/* Level Progress */}
-          <ProgressBar xp={xp} level={level} levelTitle={levelTitle} userType={userType} />
-
-          {/* Trophies & Badges Collection (Supports #trophies hash link from Kids Navbar) */}
-          <section id="trophies" className={`rounded-3xl border p-6 backdrop-blur-xs scroll-mt-20 ${
-            isKids
-              ? "border-amber-500/30 bg-slate-900/70"
-              : "border-slate-800 bg-slate-900/60"
-          }`}>
-            <h3 className="text-base font-bold text-slate-100 mb-1 flex items-center gap-2">
-              <span>{isKids ? "Your Detective Trophy Case 🏆" : "Reasoning Badges & Accomplishments 🎖️"}</span>
-              <span className="text-xs text-slate-400 font-normal">
-                ({(profile?.badges || []).length} / {AVAILABLE_BADGES.length} Unlocked)
-              </span>
-            </h3>
-            <p className="text-xs text-slate-400 mb-6">
-              {isKids
-                ? "Unlock new trophies by solving puzzles, finding clues, and keeping your daily streak alive!"
-                : "Milestone badges earned through deductive accuracy, active streaks, and cognitive exploration."}
-            </p>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-              {AVAILABLE_BADGES.map((b) => {
-                const isUnlocked = (profile?.badges || []).includes(b.id);
-                return (
+          {/* Achievements (supports #trophies link from Kids navbar) */}
+          <section id="trophies" className="scroll-mt-24">
+            <div className={`panel ${radius} p-5 sm:p-6 mb-4 flex flex-col sm:flex-row sm:items-center gap-4 justify-between`}>
+              <div>
+                <h2 className="text-base font-semibold text-ink">{isKids ? "Trophies" : "Achievements"}</h2>
+                <p className="text-sm text-slate-500 mt-0.5">
+                  <span className="font-medium text-ink">{unlockedBadges.length} of {AVAILABLE_BADGES.length}</span>{" "}
+                  {isKids ? "trophies" : "achievements"} unlocked
+                </p>
+              </div>
+              <div className="sm:w-64">
+                <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
                   <div
-                    key={b.id}
-                    className={`p-4 rounded-2xl border text-center transition-all ${
-                      isUnlocked
-                        ? isKids
-                          ? "bg-slate-950/90 border-amber-400/60 text-slate-100 shadow-md shadow-amber-500/5 ring-1 ring-amber-400/30"
-                          : "bg-slate-950/90 border-indigo-500/40 text-slate-100 shadow-xs ring-1 ring-indigo-500/20"
-                        : "bg-slate-950/40 border-slate-800/50 text-slate-600 opacity-50"
-                    }`}
-                  >
-                    <div className="text-3xl mb-1.5">{b.icon}</div>
-                    <div className="text-xs font-bold text-slate-200">{b.name}</div>
-                    <p className="text-[10px] text-slate-400 mt-1 line-clamp-2">
-                      {b.description}
-                    </p>
-                    <div className="mt-2.5">
-                      <span
-                        className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
-                          isUnlocked
-                            ? isKids
-                              ? "bg-amber-500/20 text-amber-300 font-mono"
-                              : "bg-emerald-500/20 text-emerald-300 font-mono"
-                            : "bg-slate-800 text-slate-500 font-mono"
-                        }`}
-                      >
-                        {isUnlocked ? "Unlocked ✓" : "Locked"}
-                      </span>
-                    </div>
+                    className={`h-full rounded-full origin-left animate-grow ${isKids ? "bg-amber-500" : "bg-brand-600"}`}
+                    style={{ width: `${unlockedPct}%` }}
+                  />
+                </div>
+                <p className="mt-1.5 text-xs text-slate-500 sm:text-right">{unlockedPct}% complete</p>
+              </div>
+            </div>
+            <AchievementGrid unlocked={unlockedBadges} isKids={isKids} />
+          </section>
+
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Category strengths */}
+            <div>
+              <h2 className="text-base font-semibold text-ink mb-3">
+                {isKids ? "Puzzle strengths" : "Reasoning by category"}
+              </h2>
+              <div className={`panel ${radius} p-5`}>
+                {loadingStrengths ? (
+                  <div className="space-y-4" aria-busy="true">
+                    {[0, 1, 2, 3].map((i) => (
+                      <div key={i} className="space-y-2">
+                        <div className="skeleton h-3 w-1/3" />
+                        <div className="skeleton h-1.5 w-full" />
+                      </div>
+                    ))}
                   </div>
-                );
-              })}
+                ) : (
+                  <div className="space-y-3.5">
+                    {strengths.map((cs) => {
+                      const pct = Math.round((cs.averageScore / 10) * 100);
+                      const tone = TONES[CATEGORY_TONE[cs.category] || "brand"];
+                      return (
+                        <div key={cs.category}>
+                          <div className="flex items-center justify-between gap-3 text-sm mb-1.5">
+                            <span className="flex items-center gap-2 text-slate-700 min-w-0">
+                              <CategoryIcon category={cs.category} className={`w-3.5 h-3.5 ${tone.text}`} />
+                              <span className="truncate">{cs.displayName}</span>
+                            </span>
+                            <span className="text-xs text-slate-500 tabular-nums shrink-0">
+                              {cs.count > 0 ? (
+                                <>
+                                  <span className="font-medium text-ink">{cs.averageScore}</span>/10 · {cs.count} solved
+                                </>
+                              ) : (
+                                "Not attempted"
+                              )}
+                            </span>
+                          </div>
+                          <div className="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                            <div
+                              className={`h-full rounded-full origin-left animate-grow ${isKids ? tone.solid : pct >= 80 ? "bg-green-500" : "bg-brand-600"}`}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Recent activity */}
+            <div>
+              <div className="flex items-baseline justify-between gap-4 mb-3">
+                <h2 className="text-base font-semibold text-ink">Recent activity</h2>
+                {recent.length > 0 && (
+                  <Link href="/history" className="text-sm font-medium text-brand-600 hover:text-brand-700">
+                    View history
+                  </Link>
+                )}
+              </div>
+              <RecentActivityList records={recent} />
             </div>
           </section>
 
-          {/* Category Strengths Matrix */}
-          <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 backdrop-blur-xs">
-            <h3 className="text-base font-bold text-slate-100 mb-1">
-              {isKids ? "Your Puzzle Strengths Breakdown ⭐" : "Cognitive Domain Competency Breakdown"}
-            </h3>
-            <p className="text-xs text-slate-400 mb-6">
-              {isKids
-                ? "See how well you solved each puzzle theme based on your detective scores!"
-                : "Calculated dynamically from your completed challenge reasoning scores."}
-            </p>
-
-            {loadingStrengths ? (
-              <LoadingState message="Loading performance metrics..." size="md" />
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {strengths.map((cs) => {
-                  const pct = Math.round((cs.averageScore / 10) * 100);
-                  return (
-                    <div
-                      key={cs.category}
-                      className="p-4 rounded-2xl border border-slate-800/80 bg-slate-950/50 space-y-2"
-                    >
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-bold text-slate-200 flex items-center gap-2">
-                          <span className="text-lg">{cs.icon}</span>
-                          <span>{cs.displayName}</span>
-                        </span>
-                        <span className="font-mono text-slate-400">
-                          {cs.count > 0 ? (
-                            <>
-                              <span className="font-bold text-slate-100">{cs.averageScore}</span>
-                              /10 ({cs.count} solved)
-                            </>
-                          ) : (
-                            <span className="text-slate-600">Unattempted</span>
-                          )}
-                        </span>
-                      </div>
-
-                      <div className="w-full h-2 rounded-full bg-slate-900 overflow-hidden border border-slate-800/60">
-                        <div
-                          className={`h-full rounded-full transition-all duration-500 ${
-                            pct >= 80
-                              ? "bg-emerald-500"
-                              : pct >= 60
-                              ? isKids ? "bg-amber-400" : "bg-indigo-500"
-                              : pct > 0
-                              ? "bg-amber-500"
-                              : "bg-slate-800"
-                          }`}
-                          style={{ width: `${Math.max(5, pct)}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </section>
-
-          {/* Telemetry & Security Footprint */}
-          <section className="rounded-3xl border border-slate-800/60 bg-slate-950/40 p-6 text-xs text-slate-400 space-y-2">
-            <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              Account Security & Telemetry
+          {/* Account details */}
+          <section className="panel p-5 sm:p-6">
+            <div className="flex items-center justify-between gap-4 mb-4">
+              <h2 className="text-base font-semibold text-ink">Account details</h2>
+              <button type="button" onClick={() => logout()} className="btn btn-sm btn-ghost">
+                <Icon name="logOut" className="w-4 h-4" />
+                Sign out
+              </button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono">
-              <div>
-                <span className="text-slate-500">Account UID:</span>{" "}
-                <span className="text-slate-300">{user?.uid || "—"}</span>
+            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-3 text-sm">
+              <div className="flex flex-col sm:flex-row sm:gap-2 min-w-0">
+                <dt className="text-slate-500 shrink-0">Email</dt>
+                <dd className="text-slate-700 break-all">{user?.email || "—"}</dd>
               </div>
-              <div>
-                <span className="text-slate-500">Auth Email:</span>{" "}
-                <span className="text-slate-300">{user?.email || "—"}</span>
+              <div className="flex flex-col sm:flex-row sm:gap-2 min-w-0">
+                <dt className="text-slate-500 shrink-0">Account ID</dt>
+                <dd className="text-slate-700 font-mono text-xs sm:text-sm break-all">{user?.uid || "—"}</dd>
               </div>
-              <div>
-                <span className="text-slate-500">Storage Engine:</span>{" "}
-                <span className="text-slate-300">Firebase Firestore (Protected)</span>
+              <div className="flex flex-col sm:flex-row sm:gap-2">
+                <dt className="text-slate-500 shrink-0">Storage</dt>
+                <dd className="text-slate-700">Firebase Firestore (protected)</dd>
               </div>
-              <div>
-                <span className="text-slate-500">AI Reasoning Engine:</span>{" "}
-                <span className="text-slate-300">OpenAI Server API + Fallback</span>
+              <div className="flex flex-col sm:flex-row sm:gap-2">
+                <dt className="text-slate-500 shrink-0">AI engine</dt>
+                <dd className="text-slate-700">OpenAI server API with fallback</dd>
               </div>
-            </div>
+            </dl>
           </section>
         </main>
       </div>

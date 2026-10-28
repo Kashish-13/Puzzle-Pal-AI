@@ -7,6 +7,8 @@ import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { createUserProfile } from "@/lib/firestore";
 import { useAuth } from "@/lib/auth";
+import AuthShell from "@/components/AuthShell";
+import Icon from "@/components/Icon";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -50,7 +52,7 @@ export default function SignupPage() {
         return { label: "Good", color: "bg-emerald-500", score: 3 };
       case 4:
       default:
-        return { label: "Strong", color: "bg-indigo-500", score: 4 };
+        return { label: "Strong", color: "bg-brand-500", score: 4 };
     }
   };
 
@@ -130,166 +132,155 @@ export default function SignupPage() {
     }
   };
 
+
   return (
-    <main className="min-h-screen bg-[#090d16] flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-slate-900/90 rounded-2xl p-8 sm:p-10 border border-slate-800 shadow-2xl backdrop-blur-md">
-        <div className="text-center mb-6">
-          <Link href="/" className="inline-flex items-center gap-2 mb-2">
-            <span className="text-3xl">🧠</span>
-            <span className="text-xl font-black tracking-tight text-white">
-              PuzzlePal AI
-            </span>
-          </Link>
-          <h1 className="text-xl font-bold text-slate-100">Create Account</h1>
-          <p className="text-xs text-slate-400 mt-1 font-medium">
-            Join the AI-powered reasoning & puzzle platform
-          </p>
+    <AuthShell>
+      <h1 className="text-2xl font-semibold tracking-tight text-ink">Create your account</h1>
+      <p className="text-sm text-slate-500 mt-1.5">Start practicing structured reasoning — free.</p>
+
+      {error && (
+        <div role="alert" className="mt-6 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-start gap-2 animate-fade-up">
+          <Icon name="alertCircle" className="w-4 h-4 mt-0.5" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      <form onSubmit={handleSignup} className="mt-8 space-y-5">
+        <div>
+          <label htmlFor="fullName" className="label">
+            Full name
+          </label>
+          <input
+            id="fullName"
+            type="text"
+            autoComplete="name"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            placeholder="Alex Morgan"
+            required
+            className="input"
+          />
         </div>
 
-        {error && (
-          <div className="mb-5 p-3.5 rounded-xl bg-rose-950/60 border border-rose-800/60 text-rose-300 text-xs font-semibold flex items-center gap-2">
-            <span>⚠️</span>
-            <span>{error}</span>
-          </div>
-        )}
+        <div>
+          <label htmlFor="email" className="label">
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="alex@example.com"
+            required
+            className="input"
+          />
+        </div>
 
-        <form onSubmit={handleSignup} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-              Full Name
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <label htmlFor="password" className="text-sm font-medium text-slate-700">
+              Password
             </label>
-            <input
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Alex Morgan"
-              required
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-hidden text-slate-100 text-sm font-medium transition-colors"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-              Email Address
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="alex@example.com"
-              required
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-hidden text-slate-100 text-sm font-medium transition-colors"
-            />
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
-                Password
-              </label>
-              {password && (
-                <span className="text-[11px] font-semibold text-slate-400">
-                  Strength:{" "}
-                  <span
-                    className={
-                      passwordStrength.score >= 3
-                        ? "text-emerald-400"
-                        : passwordStrength.score === 2
-                        ? "text-amber-400"
-                        : "text-rose-400"
-                    }
-                  >
-                    {passwordStrength.label}
-                  </span>
-                </span>
-              )}
-            </div>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 6 characters"
-                required
-                className="w-full px-3.5 py-2.5 pr-10 rounded-xl bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-hidden text-slate-100 text-sm font-medium transition-colors"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 text-xs"
-                tabIndex={-1}
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
-            </div>
             {password && (
-              <div className="grid grid-cols-4 gap-1.5 mt-2">
-                {[1, 2, 3, 4].map((step) => (
-                  <div
-                    key={step}
-                    className={`h-1 rounded-full transition-all duration-300 ${
-                      step <= passwordStrength.score
-                        ? passwordStrength.color
-                        : "bg-slate-800"
-                    }`}
-                  />
-                ))}
-              </div>
+              <span className="text-xs text-slate-500">
+                Strength:{" "}
+                <span
+                  className={`font-medium ${
+                    passwordStrength.score >= 3
+                      ? "text-green-600"
+                      : passwordStrength.score === 2
+                      ? "text-amber-600"
+                      : "text-rose-600"
+                  }`}
+                >
+                  {passwordStrength.label}
+                </span>
+              </span>
             )}
           </div>
-
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-              Confirm Password
-            </label>
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Re-enter password"
-                required
-                className="w-full px-3.5 py-2.5 pr-10 rounded-xl bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-hidden text-slate-100 text-sm font-medium transition-colors"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 text-xs"
-                tabIndex={-1}
-              >
-                {showConfirmPassword ? "Hide" : "Show"}
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full mt-2 py-3 px-4 rounded-xl font-bold text-sm text-white bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] disabled:opacity-50 transition-all shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <>
-                <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                <span>Creating Account...</span>
-              </>
-            ) : (
-              <span>Create Account →</span>
-            )}
-          </button>
-        </form>
-
-        <div className="mt-6 pt-6 border-t border-slate-800 text-center">
-          <p className="text-xs text-slate-400 font-medium">
-            Already have an account?{" "}
-            <Link
-              href="/login"
-              className="text-indigo-400 hover:text-indigo-300 font-semibold"
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="At least 6 characters"
+              required
+              className="input pr-16"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-ink text-xs font-medium"
+              tabIndex={-1}
             >
-              Sign in
-            </Link>
-          </p>
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
+          {password && (
+            <div className="grid grid-cols-4 gap-1.5 mt-2">
+              {[1, 2, 3, 4].map((step) => (
+                <div
+                  key={step}
+                  className={`h-1 rounded-full transition-colors duration-300 ${
+                    step <= passwordStrength.score ? passwordStrength.color : "bg-slate-200"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      </div>
-    </main>
+
+        <div>
+          <label htmlFor="confirmPassword" className="label">
+            Confirm password
+          </label>
+          <div className="relative">
+            <input
+              id="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Re-enter password"
+              required
+              className="input pr-16"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-ink text-xs font-medium"
+              tabIndex={-1}
+            >
+              {showConfirmPassword ? "Hide" : "Show"}
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" disabled={loading} className="btn btn-primary btn-lg w-full">
+          {loading ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span>Creating account...</span>
+            </>
+          ) : (
+            <>
+              <span>Create account</span>
+              <Icon name="arrowRight" className="w-4 h-4" />
+            </>
+          )}
+        </button>
+      </form>
+
+      <p className="mt-8 text-sm text-slate-500">
+        Already have an account?{" "}
+        <Link href="/login" className="font-medium text-brand-600 hover:text-brand-700">
+          Sign in
+        </Link>
+      </p>
+    </AuthShell>
   );
 }
