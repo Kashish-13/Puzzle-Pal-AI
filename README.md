@@ -75,7 +75,7 @@ Sign Up (Name, Email, Password with Strength Meter)
 
 
 
-   ##          🏗️ AECHITECTURE 
+   ##          🏗️ ARCHITECTURE 
 
 User
   │
