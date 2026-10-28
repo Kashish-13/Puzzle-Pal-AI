@@ -75,6 +75,39 @@ Sign Up (Name, Email, Password with Strength Meter)
 ```
 
 ---
+🏗️ Architecture
+
+┌─────────────────────────────────────────────┐
+│                Next.js Frontend             │
+│                                             │
+│  Landing • Auth • Onboarding • Dashboard   │
+│  Challenges • History • Profile             │
+└──────────────────────┬──────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────┐
+│              Firebase Services              │
+│                                             │
+│ Firebase Auth • Firestore • Storage         │
+└──────────────────────┬──────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────┐
+│             Next.js API Routes              │
+│                                             │
+│ /api/generate-challenge                     │
+│ /api/evaluate-reasoning                     │
+│ /api/hint                                   │
+└──────────────────────┬──────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────┐
+│               AI Processing                 │
+│                                             │
+│ Challenge Generation • Evaluation • Hints   │
+└─────────────────────────────────────────────┘
+
+
 
 ## 🏆 Rewards & Gamification
 
