@@ -77,35 +77,45 @@ Sign Up (Name, Email, Password with Strength Meter)
 ---
 🏗️ Architecture
 
-┌─────────────────────────────────────────────┐
-│                Next.js Frontend             │
-│                                             │
-│  Landing • Auth • Onboarding • Dashboard   │
-│  Challenges • History • Profile             │
-└──────────────────────┬──────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────┐
-│              Firebase Services              │
-│                                             │
-│ Firebase Auth • Firestore • Storage         │
-└──────────────────────┬──────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────┐
-│             Next.js API Routes              │
-│                                             │
-│ /api/generate-challenge                     │
-│ /api/evaluate-reasoning                     │
-│ /api/hint                                   │
-└──────────────────────┬──────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────┐
-│               AI Processing                 │
-│                                             │
-│ Challenge Generation • Evaluation • Hints   │
-└─────────────────────────────────────────────┘
+## 🏗️ Architecture
+
+                    User
+                     │
+                     ▼
+              Next.js Frontend
+                     │
+        ┌────────────┼────────────┐
+        ▼            ▼            ▼
+      Auth       Dashboard     Challenges
+        │            │            │
+        └────────────┼────────────┘
+                     │
+                     ▼
+             Firebase Services
+          Auth • Firestore • Storage
+                     │
+                     ▼
+            Next.js API Routes
+                     │
+       ┌─────────────┼─────────────┐
+       ▼             ▼             ▼
+  Challenge      Reasoning       AI Hint
+  Generation     Evaluation      System
+       │             │             │
+       └─────────────┼─────────────┘
+                     │
+                     ▼
+                AI Processing
+                     │
+                     ▼
+          Score • Feedback • Hints
+                     │
+                     ▼
+            XP • Badges • Streaks
+                     │
+                     ▼
+          Progress & History
+               in Firestore
 
 
 
