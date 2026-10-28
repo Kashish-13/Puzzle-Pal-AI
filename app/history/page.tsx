@@ -12,11 +12,15 @@ import { useAuth } from "@/lib/auth";
 import { getChallengeHistory, CATEGORY_INFO } from "@/lib/firestore";
 import { ChallengeCategory, ChallengeHistoryRecord } from "@/lib/types";
 
+interface FormattedHistoryRecord extends ChallengeHistoryRecord {
+  formattedDate: string;
+}
+
 export default function HistoryPage() {
   const { user, profile } = useAuth();
   const isKids = profile?.userType === "kids";
 
-  const [history, setHistory] = useState<ChallengeHistoryRecord[]>([]);
+  const [history, setHistory] = useState<FormattedHistoryRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedCategory, setSelectedCategory] = useState<ChallengeCategory | "all">("all");
   const [selectedRecord, setSelectedRecord] = useState<ChallengeHistoryRecord | null>(null);
@@ -31,7 +35,29 @@ export default function HistoryPage() {
         const filter = selectedCategory === "all" ? undefined : selectedCategory;
         const records = await getChallengeHistory(user.uid, filter);
         if (!ignore) {
-          setHistory(records);
+          const formatted: FormattedHistoryRecord[] = records.map((record) => {
+            let formattedDate = "Recent";
+            if (record.completedAt) {
+              try {
+                const dateObj =
+                  typeof record.completedAt.toDate === "function"
+                    ? record.completedAt.toDate()
+                    : new Date(record.completedAt as unknown as string | number);
+                formattedDate = dateObj.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                });
+              } catch {
+                formattedDate = "Recent";
+              }
+            }
+            return {
+              ...record,
+              formattedDate,
+            };
+          });
+          setHistory(formatted);
         }
       } catch (err) {
         console.error("Failed to load history:", err);
@@ -237,13 +263,7 @@ export default function HistoryPage() {
           ) : (
             <div className="space-y-3">
               {history.map((record) => {
-                const dateStr = record.completedAt
-                  ? new Date(record.completedAt.toDate()).toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })
-                  : "Recent";
+                const dateStr = record.formattedDate || "Recent";
 
                 return (
                   <div
