@@ -1,6 +1,9 @@
 # 🧠 PuzzlePal AI
 
-> **"Think. Reason. Solve."**  
+> **"Think. Reason. Solve."**
+>
+🚀 **Live Demo:** [Visit PuzzlePal AI](https://puzzlepal-ai.vercel.app/)
+> 
 > AI-powered reasoning challenges and smart puzzles designed to evaluate how you think — not just whether you're correct.
 
 PuzzlePal AI is a full-stack, dual-experience cognitive platform built with Next.js 16 (App Router), TypeScript, Firebase Authentication, Firebase Firestore, and OpenAI server-side APIs.
