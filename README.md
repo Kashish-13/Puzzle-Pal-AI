@@ -1,4 +1,4 @@
-# 🧠 PuzzlePal AI
+,# 🧠 PuzzlePal AI
 
 > **"Think. Reason. Solve."**
 >
@@ -25,7 +25,7 @@ During onboarding, users select their persona to personalize puzzles, language, 
   - 🔢 **Fun Math Puzzles**: Pizza fractions, animal legs, and balance scales.
   - 💡 **Creative Thinking**: Desert island shelters and wacky inventions.
   - 🔤 **Word Games**: Secret anagrams, word ladders, and ciphers.
-- **Tone**: Playful, encouraging, positive, and curiosity-driven.
+- **Tone**: Playful, encouraging, positive, sharp brain and curiosity-driven.
 
 ### 🎓 2. Students & Young Professionals ("Logic, Reasoning & Real-World Thinking")
 - **Audience**: College students, developers, aspiring managers, and job seekers.
