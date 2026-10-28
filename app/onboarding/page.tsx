@@ -9,7 +9,7 @@ import { UserType } from "@/lib/types";
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { user, profile, refreshProfile } = useAuth();
+  const { user, profile, refreshProfile, updateProfileLocally } = useAuth();
 
   const [step, setStep] = useState<1 | 2>(1);
   const [selectedType, setSelectedType] = useState<UserType | null>(
@@ -53,6 +53,15 @@ export default function OnboardingPage() {
     try {
       setSaving(true);
       setError("");
+
+      updateProfileLocally({
+        userType: selectedType,
+        ...(selectedType === "kids" ? { ageRange } : {}),
+        ...(selectedType === "student" ? { academicLevel } : {}),
+        interests: selectedInterests,
+        onboardingCompleted: true,
+        currentDifficulty: selectedType === "kids" ? "easy" : "medium",
+      });
 
       await updateUserProfile(user.uid, {
         userType: selectedType,

@@ -17,7 +17,7 @@ import {
 import { CategoryStrength, UserType } from "@/lib/types";
 
 export default function ProfilePage() {
-  const { user, profile, refreshProfile, logout } = useAuth();
+  const { user, profile, refreshProfile, updateProfileLocally, logout } = useAuth();
   const [strengths, setStrengths] = useState<CategoryStrength[]>([]);
   const [loadingStrengths, setLoadingStrengths] = useState<boolean>(true);
 
@@ -91,6 +91,15 @@ export default function ProfilePage() {
       setSaving(true);
       setSaveError("");
       setSaveSuccess(false);
+
+      updateProfileLocally({
+        ...(editFullName.trim() ? { fullName: editFullName.trim() } : {}),
+        userType: editUserType,
+        ...(editUserType === "kids" ? { ageRange: editAgeRange } : {}),
+        ...(editUserType === "student" ? { academicLevel: editAcademicLevel } : {}),
+        interests: editInterests,
+        currentDifficulty: editUserType === "kids" ? "easy" : "medium",
+      });
 
       await updateUserProfile(user.uid, {
         ...(editFullName.trim() ? { fullName: editFullName.trim() } : {}),

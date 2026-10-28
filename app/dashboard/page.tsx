@@ -23,7 +23,7 @@ import {
 import { ChallengeCategory, CategoryStrength, ChallengeHistoryRecord } from "@/lib/types";
 
 export default function DashboardPage() {
-  const { user, profile, refreshProfile } = useAuth();
+  const { user, profile, refreshProfile, updateProfileLocally } = useAuth();
 
   const xp = profile?.xp ?? 0;
   const level = profile?.level ?? 1;
@@ -64,12 +64,20 @@ export default function DashboardPage() {
 
   const handleToggleMode = async () => {
     if (!user) return;
+    const newType = isKids ? "student" : "kids";
+    const newDifficulty = newType === "kids" ? "easy" : "medium";
+
+    // 1. Immediate optimistic update so UI switches in 0ms without delay or freezing
+    updateProfileLocally({
+      userType: newType,
+      currentDifficulty: newDifficulty,
+    });
+
     try {
       setSwitchingMode(true);
-      const newType = isKids ? "student" : "kids";
       await updateUserProfile(user.uid, {
         userType: newType,
-        currentDifficulty: newType === "kids" ? "easy" : "medium",
+        currentDifficulty: newDifficulty,
       });
       await refreshProfile();
     } catch (err) {
