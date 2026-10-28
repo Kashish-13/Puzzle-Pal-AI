@@ -19,23 +19,22 @@ export default function CodeSnippetRenderer({
   };
 
   return (
-    <div className="my-5 rounded-xl border border-slate-800 bg-slate-950/90 overflow-hidden shadow-sm">
-      <div className="flex items-center justify-between border-b border-slate-800/80 px-4 py-2 bg-slate-900/60 text-xs">
-        <span className="font-mono text-indigo-400 font-semibold uppercase tracking-wider">
+    <div className="rounded-lg border border-slate-200 bg-slate-50 overflow-hidden">
+      <div className="flex items-center justify-between border-b border-slate-200 px-4 py-2 text-xs">
+        <span className="font-mono font-medium text-slate-600">
           {codeSnippet.language}
         </span>
         <button
           type="button"
           onClick={handleCopy}
-          className="text-slate-400 hover:text-slate-200 transition-colors font-mono"
+          className="font-medium text-slate-500 hover:text-ink transition-colors"
         >
-          {copied ? "✓ Copied" : "Copy"}
+          {copied ? "Copied" : "Copy"}
         </button>
       </div>
-      <div className="p-4 overflow-x-auto text-xs sm:text-sm font-mono text-slate-200 leading-relaxed">
+      <div className="p-4 overflow-x-auto text-xs sm:text-sm font-mono text-slate-800 leading-relaxed">
         <pre>{codeSnippet.code}</pre>
       </div>
     </div>
   );
 }
-

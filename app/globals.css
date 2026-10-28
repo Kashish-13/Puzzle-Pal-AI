@@ -1,53 +1,103 @@
 @import "tailwindcss";
 
+/* PuzzlePal design tokens — "Premium EdTech + Playful Intelligence" */
+@theme {
+  --color-brand-50: #f3f1ff;
+  --color-brand-100: #e8e5ff;
+  --color-brand-200: #d2ccff;
+  --color-brand-300: #b2a8ff;
+  --color-brand-400: #8b7dff;
+  --color-brand-500: #6f61ff;
+  --color-brand-600: #5b4bff;
+  --color-brand-700: #4a3be0;
+  --color-brand-800: #3c30b5;
+  --color-ink: #111827;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.03);
+  --shadow-lift: 0 8px 24px -8px rgba(15, 23, 42, 0.12), 0 2px 6px rgba(15, 23, 42, 0.04);
+
+  --animate-fade-up: fade-up 0.35s ease-out both;
+  --animate-pop: pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
+  --animate-grow: grow 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes pop {
+    0% { opacity: 0; transform: scale(0.85); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes grow {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+}
+
 :root {
-  --background: #090d16;
-  --foreground: #f1f5f9;
-  --card-bg: #0f172a;
-  --card-border: #1e293b;
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --background: #f8fafc;
+  --foreground: #111827;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans);
   overflow-x: hidden;
 }
 
-/* Glassmorphism & Custom Accents */
-.glass-panel {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(51, 65, 85, 0.6);
+/* Shared UI primitives — one button, input and surface style across the app */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-150 select-none active:translate-y-px focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 disabled:pointer-events-none disabled:opacity-50;
+  }
+  .btn-sm { @apply px-3 py-1.5 text-sm; }
+  .btn-lg { @apply px-5 py-3 text-[15px]; }
+
+  .btn-primary {
+    @apply bg-brand-600 text-white shadow-[0_1px_2px_rgba(91,75,255,0.25),inset_0_1px_0_rgba(255,255,255,0.12)] hover:bg-brand-700 hover:shadow-[0_4px_12px_-2px_rgba(91,75,255,0.35)];
+  }
+  .btn-secondary {
+    @apply border border-slate-200 bg-white text-ink shadow-card hover:border-slate-300 hover:bg-slate-50;
+  }
+  .btn-ghost {
+    @apply text-slate-600 hover:bg-slate-100 hover:text-ink;
+  }
+
+  .input {
+    @apply w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-ink shadow-card transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-600/10 focus:outline-none;
+  }
+  .label { @apply mb-1.5 block text-sm font-medium text-slate-700; }
+  .eyebrow { @apply text-xs font-semibold uppercase tracking-[0.08em] text-brand-600; }
+
+  .panel { @apply rounded-2xl border border-slate-200 bg-white shadow-card; }
+  .card-interactive {
+    @apply transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-lift;
+  }
+
+  /* Selectable option: border + tint + check communicate the selected state */
+  .option {
+    @apply rounded-xl border border-slate-200 bg-white text-left shadow-card transition-all duration-150 hover:border-slate-300;
+  }
+  .option-selected {
+    @apply border-brand-600 bg-brand-50/50 ring-1 ring-brand-600 hover:border-brand-600;
+  }
+
+  .skeleton { @apply animate-pulse rounded-md bg-slate-200/70; }
+  .page-enter { @apply animate-fade-up; }
 }
 
-.glass-card {
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(51, 65, 85, 0.4);
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
-.glass-card:hover {
-  border-color: rgba(99, 102, 241, 0.4);
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #090d16;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #475569;
-}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }

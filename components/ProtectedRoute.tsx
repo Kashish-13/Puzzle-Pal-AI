@@ -21,10 +21,8 @@ export default function ProtectedRoute({
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#090d16]">
-        <div className="bg-slate-900/80 p-8 rounded-2xl border border-slate-800 max-w-sm w-full mx-4 text-center">
-          <LoadingState message="Authenticating session..." size="lg" />
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <LoadingState message="Authenticating session..." size="lg" />
       </div>
     );
   }

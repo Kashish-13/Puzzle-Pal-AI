@@ -1,47 +1,37 @@
 "use client";
 
 import React from "react";
+import Icon, { IconName } from "./Icon";
+import { Tone, TONES } from "./tokens";
 
-interface StatsCardProps {
+export interface StatItem {
   label: string;
   value: string | number;
   subtext?: string;
-  icon?: string;
-  badge?: string;
+  icon: IconName;
+  tone: Tone;
 }
 
-export default function StatsCard({
-  label,
-  value,
-  subtext,
-  icon,
-  badge,
-}: StatsCardProps) {
+/**
+ * Grid of compact metric cards: icon, label, strong number, supporting text.
+ */
+export default function StatsCard({ items, playful = false }: { items: StatItem[]; playful?: boolean }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60 p-5 backdrop-blur-xs transition-all duration-200 hover:border-slate-700/80 hover:bg-slate-900/80">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-          {label}
-        </span>
-        {icon && <span className="text-lg opacity-80">{icon}</span>}
-      </div>
-
-      <div className="mt-3 flex items-baseline gap-2">
-        <div className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-slate-100">
-          {value}
+    <dl className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
+      {items.map((item) => (
+        <div key={item.label} className={`panel p-4 ${playful ? "rounded-3xl" : ""}`}>
+          <div className="flex items-center gap-2">
+            <span
+              className={`w-7 h-7 flex items-center justify-center ${playful ? "rounded-full" : "rounded-lg"} ${TONES[item.tone].soft}`}
+            >
+              <Icon name={item.icon} className="w-4 h-4" />
+            </span>
+            <dt className="text-sm text-slate-500 truncate">{item.label}</dt>
+          </div>
+          <dd className="mt-3 text-2xl font-semibold tracking-tight text-ink tabular-nums">{item.value}</dd>
+          {item.subtext && <dd className="mt-0.5 text-xs text-slate-500 truncate">{item.subtext}</dd>}
         </div>
-        {badge && (
-          <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-950/80 text-indigo-300 border border-indigo-800/60">
-            {badge}
-          </span>
-        )}
-      </div>
-
-      {subtext && (
-        <p className="mt-1 text-xs text-slate-500 font-medium truncate">
-          {subtext}
-        </p>
-      )}
-    </div>
+      ))}
+    </dl>
   );
 }

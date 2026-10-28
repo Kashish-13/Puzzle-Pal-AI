@@ -13,23 +13,16 @@ export default function LoadingState({
 }: LoadingStateProps) {
   const spinnerSizes = {
     sm: "w-5 h-5 border-2",
-    md: "w-8 h-8 border-2",
-    lg: "w-12 h-12 border-3",
+    md: "w-7 h-7 border-2",
+    lg: "w-9 h-9 border-[3px]",
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-8 text-center space-y-4">
-      <div className="relative">
-        <div
-          className={`${spinnerSizes[size]} rounded-full border-slate-700 border-t-indigo-500 animate-spin`}
-        />
-        <div className="absolute inset-0 flex items-center justify-center text-[10px] text-indigo-400">
-          ●
-        </div>
-      </div>
-      <p className="text-sm font-medium text-slate-400 animate-pulse tracking-wide">
-        {message}
-      </p>
+    <div className="flex flex-col items-center justify-center p-8 text-center space-y-4" role="status">
+      <div
+        className={`${spinnerSizes[size]} rounded-full border-brand-100 border-t-brand-600 animate-spin`}
+      />
+      <p className="text-sm text-slate-500">{message}</p>
     </div>
   );
 }

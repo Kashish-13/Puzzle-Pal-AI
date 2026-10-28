@@ -414,7 +414,22 @@ export async function updateUserProfile(
     }
   }
 
-  await updateDoc(userRef, cleanUpdates);
+  // Update local storage backup immediately
+  if (typeof window !== "undefined") {
+    try {
+      const key = `puzzlepal_profile_${uid}`;
+      const cached = localStorage.getItem(key);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        localStorage.setItem(key, JSON.stringify({ ...parsed, ...updates }));
+      }
+    } catch {}
+  }
+
+  // Race setDoc against a 3.5s timeout to prevent hanging if network acknowledgment is slow
+  const setDocPromise = setDoc(userRef, cleanUpdates, { merge: true });
+  const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 3500));
+  await Promise.race([setDocPromise, timeoutPromise]);
 }
 
 /**
@@ -425,36 +440,73 @@ export async function getUserProfile(
   email?: string | null
 ): Promise<UserProfile> {
   const userRef = doc(db, "users", uid);
-  const snap = await getDoc(userRef);
 
-  if (snap.exists()) {
-    const d = snap.data();
-    const xp = d.xp ?? 0;
+  try {
+    const snap = await getDoc(userRef);
+
+    if (snap.exists()) {
+      const d = snap.data();
+      const xp = d.xp ?? 0;
+      return {
+        uid,
+        email: d.email || email || "user@puzzlepal.ai",
+        fullName: d.fullName || d.email?.split("@")[0] || "Puzzle Solver",
+        userType: (d.userType as UserType) || null,
+        ageRange: d.ageRange,
+        academicLevel: d.academicLevel,
+        interests: d.interests || [],
+        onboardingCompleted: d.onboardingCompleted ?? Boolean(d.userType),
+        xp,
+        level: d.level ?? calculateLevel(xp),
+        reasoningScore: d.reasoningScore ?? 0,
+        challengesSolved: d.challengesSolved ?? 0,
+        currentStreak: d.currentStreak ?? 0,
+        currentDifficulty: (d.currentDifficulty as ChallengeDifficulty) || (d.userType === "kids" ? "easy" : "medium"),
+        totalHints: d.totalHints ?? 0,
+        badges: d.badges || [],
+        lastCompletedDate: d.lastCompletedDate ?? null,
+        aiInsight: d.aiInsight ?? "Sharpen your analytical framework across multiple categories.",
+        createdAt: d.createdAt,
+        updatedAt: d.updatedAt,
+      };
+    }
+
+    return await createUserProfile(uid, email || "user@puzzlepal.ai");
+  } catch (err) {
+    console.warn("Failed to fetch Firestore user profile, using fallback profile:", err);
+
+    // Read from local storage backup if available before falling back
+    let cachedType: UserType = "student";
+    let cachedDiff: ChallengeDifficulty = "medium";
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem(`puzzlepal_profile_${uid}`);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed.userType) cachedType = parsed.userType;
+          if (parsed.currentDifficulty) cachedDiff = parsed.currentDifficulty;
+        }
+      } catch {}
+    }
+
     return {
       uid,
-      email: d.email || email || "user@puzzlepal.ai",
-      fullName: d.fullName || d.email?.split("@")[0] || "Puzzle Solver",
-      userType: (d.userType as UserType) || null,
-      ageRange: d.ageRange,
-      academicLevel: d.academicLevel,
-      interests: d.interests || [],
-      onboardingCompleted: d.onboardingCompleted ?? Boolean(d.userType),
-      xp,
-      level: d.level ?? calculateLevel(xp),
-      reasoningScore: d.reasoningScore ?? 0,
-      challengesSolved: d.challengesSolved ?? 0,
-      currentStreak: d.currentStreak ?? 0,
-      currentDifficulty: (d.currentDifficulty as ChallengeDifficulty) || (d.userType === "kids" ? "easy" : "medium"),
-      totalHints: d.totalHints ?? 0,
-      badges: d.badges || [],
-      lastCompletedDate: d.lastCompletedDate ?? null,
-      aiInsight: d.aiInsight ?? "Sharpen your analytical framework across multiple categories.",
-      createdAt: d.createdAt,
-      updatedAt: d.updatedAt,
+      email: email || "user@puzzlepal.ai",
+      fullName: email?.split("@")[0] || "Puzzle Solver",
+      userType: cachedType,
+      onboardingCompleted: true,
+      xp: 0,
+      level: 1,
+      reasoningScore: 0,
+      challengesSolved: 0,
+      currentStreak: 0,
+      currentDifficulty: cachedDiff,
+      totalHints: 0,
+      badges: [],
+      lastCompletedDate: null,
+      aiInsight: "Complete a challenge to generate your AI reasoning feedback.",
     };
   }
-
-  return await createUserProfile(uid, email || "user@puzzlepal.ai");
 }
 
 /**

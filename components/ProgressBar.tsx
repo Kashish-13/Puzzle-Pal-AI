@@ -45,82 +45,40 @@ export default function ProgressBar({
   const currentInRange = Math.max(0, xp - min);
   const percentage = Math.min(100, Math.round((currentInRange / range) * 100));
   const remaining = Math.max(0, max - xp);
-
   const isKids = userType === "kids";
 
   return (
-    <div className={`rounded-2xl border p-5 backdrop-blur-md transition-all ${
-      isKids
-        ? "bg-slate-900/70 border-amber-500/30 shadow-md shadow-amber-500/5"
-        : "bg-slate-900/60 border-slate-800 shadow-sm"
-    }`}>
-      {/* Top Header */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2.5">
-          <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold ${
-            isKids
-              ? "bg-amber-400/20 text-amber-300 border border-amber-400/40"
-              : "bg-indigo-600/20 text-indigo-300 border border-indigo-500/40 font-mono"
-          }`}>
-            {level}
-          </span>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-100">
-                {levelTitle || `Level ${level}`}
-              </span>
-              <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">
-                {xp} Total XP
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">
-              {isKids
-                ? "Keep solving fun puzzles to unlock your next explorer level!"
-                : "Active learning progress toward higher reasoning complexity tiers"}
-            </p>
-          </div>
-        </div>
-
-        <div className="text-right">
-          <span className={`text-sm font-mono font-black ${
-            isKids ? "text-amber-400" : "text-indigo-400"
-          }`}>
-            {percentage}%
-          </span>
-          <span className="block text-[10px] font-mono text-slate-500">Tier Completion</span>
-        </div>
+    <div>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 mb-2.5">
+        <span className="text-sm font-semibold text-ink">
+          Level {level}
+          {levelTitle && <span className="text-slate-500 font-normal"> · {levelTitle}</span>}
+        </span>
+        <span className="text-sm text-slate-500 tabular-nums">
+          <span className="font-medium text-ink">{currentInRange}</span> / {range} XP
+          <span className="ml-2 font-medium text-brand-600">{percentage}%</span>
+        </span>
       </div>
 
-      {/* Progress Track */}
-      <div className="relative w-full h-3.5 rounded-full bg-slate-950/90 overflow-hidden border border-slate-800 p-0.5">
+      <div
+        className={`w-full rounded-full bg-slate-100 overflow-hidden ${isKids ? "h-3" : "h-2"}`}
+        role="progressbar"
+        aria-valuenow={percentage}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
         <div
-          className={`h-full rounded-full transition-all duration-700 ease-out shadow-xs ${
+          className={`h-full rounded-full origin-left animate-grow ${
             isKids
-              ? "bg-gradient-to-r from-amber-400 via-emerald-400 to-cyan-400 shadow-amber-500/40"
-              : "bg-gradient-to-r from-indigo-500 via-violet-500 to-cyan-400 shadow-indigo-500/40"
+              ? "bg-gradient-to-r from-sky-400 via-brand-500 to-brand-600"
+              : "bg-gradient-to-r from-brand-500 to-brand-600"
           }`}
           style={{ width: `${percentage}%` }}
         />
       </div>
 
-      {/* Bottom Trajectory & Milestones */}
-      <div className="flex items-center justify-between mt-2.5 text-[11px] text-slate-400">
-        <span className="font-mono">
-          {currentInRange} / {range} XP in this tier
-        </span>
-        <span>
-          {remaining > 0 ? (
-            <span className="font-semibold text-slate-300 flex items-center gap-1">
-              <span>{isKids ? "🚀" : "🎯"}</span>
-              <span>{remaining} XP to Level {nextLevel}</span>
-            </span>
-          ) : (
-            <span className="font-bold text-emerald-400 flex items-center gap-1">
-              <span>✨</span>
-              <span>Highest Milestone Reached</span>
-            </span>
-          )}
-        </span>
+      <div className="mt-2 text-xs text-slate-500">
+        {remaining > 0 ? `${remaining} XP to Level ${nextLevel}` : "Highest milestone reached"}
       </div>
     </div>
   );
