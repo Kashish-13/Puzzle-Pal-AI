@@ -73,8 +73,45 @@ Sign Up (Name, Email, Password with Strength Meter)
                        ▼
          Persistent Firestore History & Insights
 ```
+## 🏗️ Architecture
 
----
+                    User
+                     │
+                     ▼
+              Next.js Frontend
+                     │
+        ┌────────────┼────────────┐
+        ▼            ▼            ▼
+      Auth       Dashboard     Challenges
+        │            │            │
+        └────────────┼────────────┘
+                     │
+                     ▼
+             Firebase Services
+          Auth • Firestore • Storage
+                     │
+                     ▼
+            Next.js API Routes
+                     │
+       ┌─────────────┼─────────────┐
+       ▼             ▼             ▼
+  Challenge      Reasoning       AI Hint
+  Generation     Evaluation      System
+       │             │             │
+       └─────────────┼─────────────┘
+                     │
+                     ▼
+                AI Processing
+                     │
+                     ▼
+          Score • Feedback • Hints
+                     │
+                     ▼
+            XP • Badges • Streaks
+                     │
+                     ▼
+          Progress & History
+               in Firestore
 
 
 ## 🏆 Rewards & Gamification
