@@ -47,7 +47,7 @@ Sign Up (Name, Email, Password with Strength Meter)
                        │
                        ▼
             [Onboarding Selection]
-       🧒 Kids  ◄──────────────►  🎓 Students
+        Kids  ◄──────────────►  Students
   (Age & Interests)          (Stage & Focus Areas)
                        │
                        ▼
