@@ -18,7 +18,23 @@ export type ChallengeCategory =
   | "kids_pattern"
   | "kids_math"
   | "kids_creative"
-  | "kids_word";
+  | "kids_word"
+  // Interactive games (current library) — older categories above are kept for history
+  | "color-detective"
+  | "whats-behind"
+  | "odd-one"
+  | "shadow-guess"
+  | "memory-match"
+  | "where-belongs"
+  | "what-changed"
+  | "number-hunt"
+  | "crack-code"
+  | "tile-path"
+  | "memory-grid"
+  | "rotate-it"
+  | "escape-grid"
+  | "sudocode"
+  | "spot-change";
 
 export type ChallengeDifficulty = "easy" | "medium" | "hard" | "expert";
 
@@ -62,6 +78,18 @@ export interface ReasoningEvaluation {
   feedback: string;
   missedConsiderations: string[];
   idealApproach: string;
+  /** Present for interactive games: the measured performance behind the score */
+  gameStats?: GameStats;
+}
+
+export interface GameStats {
+  gameId: string;
+  correct: number;
+  total: number;
+  mistakes: number;
+  attempts: number;
+  timeMs: number;
+  hintsUsed: number;
 }
 
 export interface Badge {

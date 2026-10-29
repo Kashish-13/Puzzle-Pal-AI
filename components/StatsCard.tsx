@@ -15,9 +15,18 @@ export interface StatItem {
 /**
  * Grid of compact metric cards: icon, label, strong number, supporting text.
  */
-export default function StatsCard({ items, playful = false }: { items: StatItem[]; playful?: boolean }) {
+export default function StatsCard({
+  items,
+  playful = false,
+  columns,
+}: {
+  items: StatItem[];
+  playful?: boolean;
+  /** Force a 2-column grid (used beside another panel) */
+  columns?: 2;
+}) {
   return (
-    <dl className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
+    <dl className={`grid grid-cols-2 gap-3 ${columns === 2 ? "" : "md:grid-cols-3 xl:grid-cols-5"}`}>
       {items.map((item) => (
         <div key={item.label} className={`panel p-4 ${playful ? "rounded-3xl" : ""}`}>
           <div className="flex items-center gap-2">

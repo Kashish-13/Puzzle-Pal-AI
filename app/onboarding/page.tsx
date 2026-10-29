@@ -6,6 +6,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/lib/auth";
 import { updateUserProfile } from "@/lib/firestore";
 import { UserType } from "@/lib/types";
+import { GAMES, KIDS_GAMES, STUDENT_GAMES } from "@/lib/games/catalog";
 import { Logo } from "@/components/Navbar";
 import Icon, { IconName } from "@/components/Icon";
 
@@ -84,39 +85,23 @@ export default function OnboardingPage() {
     }
   };
 
-  const kidsInterests = [
-    { id: "kids_mystery", label: "Detective & Mystery", desc: "Finding footprints & clue tracking" },
-    { id: "kids_brain_teaser", label: "Brain Teasers & Riddles", desc: "Tricky mind-benders & clever puzzles" },
-    { id: "kids_pattern", label: "Patterns & Sequences", desc: "Shape transformations & secret color codes" },
-    { id: "kids_math", label: "Fun Math Puzzles", desc: "Pizza fractions, animal legs & balance scales" },
-    { id: "kids_creative", label: "Creative Thinking", desc: "Desert island shelters & wacky inventions" },
-    { id: "kids_word", label: "Word Games", desc: "Secret ciphers, anagrams & word bridges" },
-  ];
+  const kidsInterests = KIDS_GAMES.map((id) => ({ id, label: GAMES[id].name, desc: GAMES[id].tagline }));
 
-  const studentInterests = [
-    { id: "logic", label: "Logic & Lateral Thinking", desc: "Multi-constraint systems & deduction" },
-    { id: "business", label: "Business Decisions", desc: "Startup prioritization, unit economics & strategy" },
-    { id: "technical", label: "Technical Challenges", desc: "Architecture bottlenecks & distributed systems" },
-    { id: "data", label: "Data Reasoning", desc: "Metrics interpretation, Simpson's paradox & anomalies" },
-    { id: "mystery", label: "Mystery & Deduction", desc: "Forensic clues & timeline elimination" },
-    { id: "decision", label: "Crisis Decision Making", desc: "High-stakes mitigation & risk tradeoffs" },
-    { id: "aptitude", label: "Light Aptitude", desc: "Placement reasoning, coding-decoding & sequences" },
-    { id: "word", label: "Verbal Reasoning", desc: "Syllogistic logic & fallacy deconstruction" },
-  ];
+  const studentInterests = STUDENT_GAMES.map((id) => ({ id, label: GAMES[id].name, desc: GAMES[id].tagline }));
 
   const personaOptions: { type: UserType; title: string; flow: string; desc: string; icon: IconName }[] = [
     {
       type: "kids",
       title: "Kids",
       flow: "Play · Solve · Learn · Reward",
-      desc: "Detective mysteries, patterns, creative inventions, and friendly math riddles with encouraging feedback.",
+      desc: "Eight visual games — colors, memory, shadows, patterns and number hunts — with big, friendly controls.",
       icon: "smile",
     },
     {
       type: "student",
       title: "Students & professionals",
       flow: "Think · Solve · Analyze · Improve",
-      desc: "Interview trade-offs, architecture puzzles, data anomalies, and logic for college students and early-career professionals.",
+      desc: "Seven reasoning games — code-breaking, pathfinding, spatial rotation and program logic — that adapt to your level.",
       icon: "graduationCap",
     },
   ];
@@ -319,7 +304,7 @@ export default function OnboardingPage() {
 
                 <div>
                   <span className="label">
-                    Favorite puzzle areas <span className="font-normal text-slate-500">— pick one or more</span>
+                    Games you&apos;d like to start with <span className="font-normal text-slate-500">— pick one or more</span>
                   </span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {(selectedType === "kids" ? kidsInterests : studentInterests).map((item) => {

@@ -19,6 +19,7 @@ import {
   getChallengeHistory,
 } from "@/lib/firestore";
 import { CategoryStrength, ChallengeHistoryRecord, UserType } from "@/lib/types";
+import { GAMES, KIDS_GAMES, STUDENT_GAMES } from "@/lib/games/catalog";
 
 export default function ProfilePage() {
   const { user, profile, refreshProfile, updateProfileLocally, logout } = useAuth();
@@ -125,25 +126,7 @@ export default function ProfilePage() {
     }
   };
 
-  const interestOptions = editUserType === "kids"
-    ? [
-        { id: "kids_mystery", label: "Detective & Mystery" },
-        { id: "kids_brain_teaser", label: "Brain Teasers & Riddles" },
-        { id: "kids_pattern", label: "Patterns & Sequences" },
-        { id: "kids_math", label: "Fun Math Puzzles" },
-        { id: "kids_creative", label: "Creative Thinking" },
-        { id: "kids_word", label: "Word Games" },
-      ]
-    : [
-        { id: "logic", label: "Logic & Lateral Thinking" },
-        { id: "business", label: "Business Decisions" },
-        { id: "technical", label: "Technical Challenges" },
-        { id: "data", label: "Data Reasoning" },
-        { id: "mystery", label: "Mystery & Deduction" },
-        { id: "decision", label: "Decision Making" },
-        { id: "aptitude", label: "Light Aptitude" },
-        { id: "word", label: "Verbal Reasoning" },
-      ];
+  const interestOptions = (editUserType === "kids" ? KIDS_GAMES : STUDENT_GAMES).map((id) => ({ id, label: GAMES[id].name }));
 
   // Recent activity (read-only, same source as the dashboard)
   const [recent, setRecent] = useState<ChallengeHistoryRecord[]>([]);
@@ -295,7 +278,7 @@ export default function ProfilePage() {
               )}
 
               <div>
-                <span className="label">Focus areas</span>
+                <span className="label">Favorite games</span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                   {interestOptions.map((opt) => {
                     const isSelected = editInterests.includes(opt.id);

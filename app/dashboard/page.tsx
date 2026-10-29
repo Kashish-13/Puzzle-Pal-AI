@@ -6,15 +6,18 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Navbar from "@/components/Navbar";
 import StatsCard from "@/components/StatsCard";
 import ProgressBar from "@/components/ProgressBar";
-import DifficultyBadge from "@/components/DifficultyBadge";
 import Icon, { CategoryIcon, stripLeadingEmoji } from "@/components/Icon";
 import ReasoningGraph from "@/components/ReasoningGraph";
 import RecentActivityList from "@/components/RecentActivityList";
 import AchievementGrid from "@/components/AchievementGrid";
 import { CATEGORY_TONE, DIFFICULTY_XP, TONES } from "@/components/tokens";
+import SectionHeader from "@/components/SectionHeader";
+import ChallengeCard from "@/components/games/ChallengeCard";
+import ChallengePreview from "@/components/games/ChallengePreview";
+import { GAMES, isGameId } from "@/lib/games/catalog";
+import type { GameId } from "@/lib/games/types";
 import { useAuth } from "@/lib/auth";
 import {
-  CATEGORY_INFO,
   STUDENT_CATEGORIES,
   KIDS_CATEGORIES,
   AVAILABLE_BADGES,
@@ -60,11 +63,8 @@ export default function DashboardPage() {
   const recommendedCategory: ChallengeCategory =
     profile?.interests && profile.interests.length > 0 && activeCategories.includes(profile.interests[0] as ChallengeCategory)
       ? (profile.interests[0] as ChallengeCategory)
-      : isKids
-      ? "kids_mystery"
-      : "logic";
+      : activeCategories[0];
 
-  const recommendedInfo = CATEGORY_INFO[recommendedCategory] || CATEGORY_INFO.logic;
 
   const handleToggleMode = async () => {
     if (!user) return;
@@ -95,7 +95,6 @@ export default function DashboardPage() {
     ? profile?.fullName?.split(" ")[0] || "Explorer"
     : profile?.fullName?.split(" ")[0] || user?.email?.split("@")[0] || "Scholar";
   const unlockedBadges = profile?.badges || [];
-  const estTime = isKids ? "5–10 min" : "6–8 min";
 
   // Time-of-day greeting, read on the client only (server renders a neutral greeting)
   const hour = useSyncExternalStore(
@@ -106,17 +105,24 @@ export default function DashboardPage() {
   const greeting =
     hour < 0 ? "Welcome back" : hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
-  // Three more categories to try, preferring the user's interests
-  const moreCategories = [
-    ...((profile?.interests || []).filter((i) =>
-      activeCategories.includes(i as ChallengeCategory)
-    ) as ChallengeCategory[]),
+  // "Continue learning": the game played most recently in this mode, else the recommendation
+  const lastPlayed = recentChallenges.find((r) => activeCategories.includes(r.category))?.category;
+  const heroGame = (isGameId(lastPlayed) ? lastPlayed : isGameId(recommendedCategory) ? recommendedCategory : activeCategories[0]) as GameId;
+  const hero = GAMES[heroGame];
+  const isContinuing = Boolean(lastPlayed);
+
+  // Three more games to try, preferring interests and ones not yet played
+  const played = new Set(categoryStrengths.filter((c) => c.count > 0).map((c) => c.category));
+  const moreGames = [
+    ...((profile?.interests || []).filter((i) => activeCategories.includes(i as ChallengeCategory)) as ChallengeCategory[]),
+    ...activeCategories.filter((c) => !played.has(c)),
     ...activeCategories,
   ]
-    .filter((c, i, arr) => c !== recommendedCategory && arr.indexOf(c) === i)
-    .slice(0, 3);
+    .filter((c, i, arr) => c !== heroGame && arr.indexOf(c) === i && isGameId(c))
+    .slice(0, 3) as GameId[];
 
   const radius = isKids ? "rounded-3xl" : "rounded-2xl";
+  const accuracyPct = reasoningScore > 0 ? Math.round(reasoningScore * 10) : null;
 
   return (
     <ProtectedRoute>
@@ -130,180 +136,135 @@ export default function DashboardPage() {
               <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-ink">
                 {greeting}, {displayName}
               </h1>
-              <p className="mt-1.5 text-slate-500">
-                {isKids ? "Ready for today's puzzle?" : "Ready to sharpen your reasoning?"}
+              <p className="mt-1.5 text-sm text-slate-500 flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span className="font-medium text-ink">Level {level}</span>
+                <span className="text-slate-300">·</span>
+                <span className="tabular-nums">{xp} XP</span>
+                <span className="text-slate-300">·</span>
+                <span className="inline-flex items-center gap-1">
+                  <Icon name={isKids ? "smile" : "graduationCap"} className={`w-3.5 h-3.5 ${isKids ? "text-sky-600" : "text-brand-600"}`} />
+                  {isKids ? "Kids mode" : "Student mode"}
+                </span>
               </p>
             </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-200 px-3 py-1.5 text-sm shadow-card">
-                <Icon name="layers" className="w-4 h-4 text-brand-600" />
-                <span className="font-medium">Level {level}</span>
-                <span className="text-slate-400">·</span>
-                <span className="text-slate-500">{levelTitle}</span>
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-3 py-1.5 text-sm font-medium text-amber-700">
-                <Icon name="zap" className="w-4 h-4" filled />
-                {xp} XP
-              </span>
-              <button
-                type="button"
-                onClick={handleToggleMode}
-                disabled={switchingMode}
-                className="btn btn-sm btn-ghost"
-                title="Switch between Kids and Student mode anytime"
-              >
-                <Icon name="arrowLeftRight" className="w-4 h-4" />
-                <span>{isKids ? "Student mode" : "Kids mode"}</span>
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleToggleMode}
+              disabled={switchingMode}
+              className="btn btn-sm btn-secondary self-start md:self-auto"
+              title="Switch between Kids and Student mode anytime"
+            >
+              <Icon name="arrowLeftRight" className="w-4 h-4 text-slate-500" />
+              <span>{isKids ? "Switch to Student" : "Switch to Kids"}</span>
+            </button>
           </div>
 
-          {/* Main CTA: recommended challenge */}
+          {/* Hero: continue learning */}
           <section
-            className={`relative overflow-hidden ${radius} p-6 sm:p-8 text-white ${
-              isKids ? "bg-gradient-to-br from-brand-600 to-sky-500" : "bg-brand-600"
+            className={`relative overflow-hidden ${radius} text-white ${
+              isKids ? "bg-gradient-to-br from-brand-600 via-brand-500 to-sky-500" : "bg-gradient-to-br from-brand-700 via-brand-600 to-blue-600"
             }`}
           >
-            <ReasoningGraph className="hidden sm:block absolute -right-10 -top-8 w-80 opacity-20 [&_circle]:fill-white [&_line]:stroke-white" />
-            <div className="relative flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-              <div className="max-w-xl">
-                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-white/70">
-                  {challengesSolved > 0 ? "Continue learning · Recommended for you" : "Recommended for you"}
+            <ReasoningGraph className="hidden md:block absolute -left-16 -bottom-24 w-96 opacity-[0.12] [&_circle]:fill-white [&_line]:stroke-white" />
+            <div className="relative grid grid-cols-1 md:grid-cols-5 gap-6 p-6 sm:p-8">
+              <div className="md:col-span-3 flex flex-col justify-center">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/70">
+                  {isContinuing ? "Continue learning" : "Recommended for you"}
                 </p>
-                <div className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-white/15 px-2 py-1 text-xs font-medium">
-                  <CategoryIcon category={recommendedCategory} className="w-3.5 h-3.5" />
-                  {recommendedInfo.name}
+                <h2 className="mt-3 text-3xl sm:text-4xl font-semibold tracking-tight">{hero.name}</h2>
+                <p className="mt-2 text-white/80 max-w-md">{hero.tagline} {hero.description}</p>
+                <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
+                  <span className="rounded-md bg-white/15 px-2 py-1 font-medium">{hero.skill}</span>
+                  <span className="rounded-md bg-white/15 px-2 py-1 font-medium capitalize">{difficulty}</span>
+                  <span className="rounded-md bg-white/15 px-2 py-1 font-medium">+{DIFFICULTY_XP[difficulty] ?? 100} XP</span>
+                  <span className="rounded-md bg-white/15 px-2 py-1 font-medium">~{hero.estMinutes} min</span>
                 </div>
-                <h2 className="mt-3 text-2xl sm:text-[28px] font-semibold tracking-tight leading-tight">
-                  {recommendedInfo.preview}
-                </h2>
-                <p className="mt-3 text-sm text-white/75 flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className="capitalize">{difficulty}</span>
-                  <span className="text-white/40">·</span>
-                  <span>{DIFFICULTY_XP[difficulty] ?? 100} XP</span>
-                  <span className="text-white/40">·</span>
-                  <span>~{estTime}</span>
-                </p>
+                <div className="mt-6">
+                  <Link
+                    href={`/challenge/session?game=${heroGame}&difficulty=${difficulty}`}
+                    className="btn btn-lg bg-white text-brand-700 hover:bg-brand-50 shadow-lift"
+                  >
+                    <Icon name="play" className="w-4 h-4" filled />
+                    {isContinuing ? "Continue challenge" : "Start challenge"}
+                  </Link>
+                </div>
               </div>
-
-              <Link
-                href={`/challenge/session?category=${recommendedCategory}&difficulty=${difficulty}`}
-                className="btn btn-lg bg-white text-brand-700 hover:bg-brand-50 shadow-lift self-start lg:self-auto"
-              >
-                <span>{isKids ? "Start puzzle" : "Start challenge"}</span>
-                <Icon name="arrowRight" className="w-4 h-4" />
-              </Link>
+              <div className="md:col-span-2 flex items-center justify-center">
+                <div className="rounded-3xl bg-white/95 shadow-lift p-6 sm:p-8 min-w-56 flex items-center justify-center rotate-[-2deg]">
+                  <div className="scale-125">
+                    <ChallengePreview gameId={heroGame} />
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
 
           {/* Progress */}
-          <section className="space-y-3">
-            <h2 className="text-base font-semibold text-ink">Your progress</h2>
-            <StatsCard
-              playful={isKids}
-              items={[
-                { label: "Level", value: level, subtext: levelTitle, icon: "layers", tone: "brand" },
-                { label: "XP", value: xp, subtext: "Lifetime experience", icon: "zap", tone: "amber" },
-                {
-                  label: "Streak",
-                  value: `${currentStreak}d`,
-                  subtext: currentStreak > 0 ? "Keep it going" : "Solve one today",
-                  icon: "flame",
-                  tone: isKids ? "sky" : "blue",
-                },
-                {
-                  label: isKids ? "Puzzles solved" : "Solved",
-                  value: challengesSolved,
-                  subtext: "All time",
-                  icon: "checkCircle",
-                  tone: "green",
-                },
-                {
-                  label: isKids ? "Star score" : "Avg. score",
-                  value: reasoningScore > 0 ? reasoningScore.toFixed(1) : "—",
-                  subtext: reasoningScore >= 8.5 ? "Master" : reasoningScore >= 7.0 ? "Skilled" : "Out of 10",
-                  icon: "activity",
-                  tone: "brand",
-                },
-              ]}
-            />
-            <div className={`panel ${radius} p-5 sm:p-6`}>
-              <ProgressBar xp={xp} level={level} levelTitle={levelTitle} userType={userType} />
+          <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className={`panel ${radius} p-5 sm:p-6 lg:col-span-1 flex flex-col justify-between`}>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">Level {level}</p>
+                <p className="mt-1 text-lg font-semibold text-ink">{levelTitle}</p>
+              </div>
+              <div className="mt-5">
+                <ProgressBar xp={xp} level={level} levelTitle={undefined} userType={userType} />
+              </div>
+            </div>
+            <div className="lg:col-span-2">
+              <StatsCard
+                playful={isKids}
+                columns={2}
+                items={[
+                  {
+                    label: "Streak",
+                    value: `${currentStreak} ${currentStreak === 1 ? "day" : "days"}`,
+                    subtext: currentStreak > 0 ? "Keep it going" : "Solve one today",
+                    icon: "flame",
+                    tone: "amber",
+                  },
+                  { label: "Puzzles solved", value: challengesSolved, subtext: "All time", icon: "checkCircle", tone: "green" },
+                  {
+                    label: isKids ? "Star score" : "Reasoning score",
+                    value: accuracyPct === null ? "—" : `${accuracyPct}%`,
+                    subtext: "Average across games",
+                    icon: "activity",
+                    tone: "brand",
+                  },
+                  { label: "Experience", value: `${xp} XP`, subtext: `Adaptive level: ${difficulty}`, icon: "zap", tone: "blue" },
+                ]}
+              />
             </div>
           </section>
 
-          {/* Recommended challenges */}
+          {/* Recommended games */}
           <section>
-            <div className="flex items-baseline justify-between gap-4 mb-3">
-              <h2 className="text-base font-semibold text-ink">
-                {isKids ? "More puzzles for you" : "Recommended challenges"}
-              </h2>
-              <Link href="/challenge" className="text-sm font-medium text-brand-600 hover:text-brand-700">
-                View all
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {moreCategories.map((catKey) => {
-                const item = CATEGORY_INFO[catKey];
-                const tone = TONES[CATEGORY_TONE[catKey] || "brand"];
-                return (
-                  <Link
-                    key={catKey}
-                    href={`/challenge/session?category=${catKey}&difficulty=${difficulty}`}
-                    className={`group panel ${radius} card-interactive p-5 flex flex-col`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ${tone.soft}`}>
-                        <CategoryIcon category={catKey} className="w-3.5 h-3.5" />
-                        {item.name}
-                      </span>
-                      <span className="text-xs text-slate-400 inline-flex items-center gap-1">
-                        <Icon name="clock" className="w-3.5 h-3.5" />
-                        {estTime}
-                      </span>
-                    </div>
-                    <h3 className="mt-3 text-[15px] font-semibold text-ink leading-snug flex-1">{item.preview}</h3>
-                    <div className="mt-4 flex items-center justify-between">
-                      <DifficultyBadge difficulty={difficulty} size="sm" />
-                      <span className="inline-flex items-center gap-1 text-sm font-medium text-brand-600">
-                        Start
-                        <Icon name="arrowRight" className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-                      </span>
-                    </div>
-                  </Link>
-                );
-              })}
+            <SectionHeader
+              title={isKids ? "More games for you" : "Recommended next"}
+              action={{ href: "/challenge", label: "All puzzles" }}
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {moreGames.map((g) => (
+                <ChallengeCard key={g} gameId={g} difficulty={difficulty} playful={isKids} />
+              ))}
             </div>
           </section>
 
           {/* Activity & performance */}
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <div className="flex items-baseline justify-between gap-4 mb-3">
-                <h2 className="text-base font-semibold text-ink">Recent activity</h2>
-                {recentChallenges.length > 0 && (
-                  <Link href="/history" className="text-sm font-medium text-brand-600 hover:text-brand-700">
-                    View history
-                  </Link>
-                )}
-              </div>
+              <SectionHeader
+                title="Recent activity"
+                action={recentChallenges.length > 0 ? { href: "/history", label: "View history" } : undefined}
+              />
               <RecentActivityList
                 records={recentChallenges}
-                emptyLabel={isKids ? "Solve your first puzzle to see it here." : "Complete your first challenge to see it here."}
+                emptyLabel={isKids ? "Play your first game to see it here." : "Complete your first challenge to see it here."}
               />
             </div>
 
             <div className="space-y-6">
               <div>
-                <div className="flex items-baseline justify-between gap-4 mb-3">
-                  <h2 className="text-base font-semibold text-ink">
-                    {isKids ? "Puzzle strengths" : "Reasoning by category"}
-                  </h2>
-                  <span className="text-xs text-slate-500">
-                    Adaptive: <span className="capitalize text-slate-700">{difficulty}</span>
-                  </span>
-                </div>
+                <SectionHeader title={isKids ? "Your strengths" : "Performance by game"} />
                 <div className={`panel ${radius} p-5 space-y-3.5`}>
                   {categoryStrengths.map((cs) => {
                     const pct = Math.round((cs.averageScore / 10) * 100);
@@ -316,13 +277,7 @@ export default function DashboardPage() {
                             <span className="truncate">{cs.displayName}</span>
                           </span>
                           <span className="text-xs text-slate-500 tabular-nums shrink-0">
-                            {cs.count > 0 ? (
-                              <>
-                                <span className="font-medium text-ink">{cs.averageScore}</span>/10 · {cs.count}
-                              </>
-                            ) : (
-                              "—"
-                            )}
+                            {cs.count > 0 ? `${pct}% · ${cs.count}` : "—"}
                           </span>
                         </div>
                         <div className={`w-full rounded-full bg-slate-100 overflow-hidden ${isKids ? "h-2" : "h-1.5"}`}>
@@ -343,7 +298,7 @@ export default function DashboardPage() {
                   {isKids ? "Your thinking insights" : "AI insights"}
                 </h2>
                 <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-                  {profile?.aiInsight || "Complete challenges to generate tailored analytical feedback."}
+                  {profile?.aiInsight || "Complete a game to get tailored feedback on your reasoning."}
                 </p>
                 {insights.length > 0 && (
                   <ul className="mt-4 space-y-2.5 text-sm text-slate-600 border-t border-slate-100 pt-4">
@@ -355,33 +310,17 @@ export default function DashboardPage() {
                     ))}
                   </ul>
                 )}
-                <Link
-                  href="/challenge"
-                  className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-brand-600 hover:text-brand-700"
-                >
-                  Configure custom difficulty
-                  <Icon name="arrowRight" className="w-3.5 h-3.5" />
-                </Link>
               </div>
             </div>
           </section>
 
           {/* Achievements preview */}
           <section>
-            <div className="flex items-baseline justify-between gap-4 mb-3">
-              <h2 className="text-base font-semibold text-ink">
-                {isKids ? "Trophies" : "Achievements"}
-                <span className="ml-2 text-sm font-normal text-slate-500">
-                  {unlockedBadges.length} of {AVAILABLE_BADGES.length} unlocked
-                </span>
-              </h2>
-              <Link
-                href="/profile#trophies"
-                className="text-sm font-medium text-brand-600 hover:text-brand-700"
-              >
-                View all
-              </Link>
-            </div>
+            <SectionHeader
+              title={isKids ? "Trophies" : "Achievements"}
+              meta={`${unlockedBadges.length} of ${AVAILABLE_BADGES.length} unlocked`}
+              action={{ href: "/profile#trophies", label: "View all" }}
+            />
             <AchievementGrid unlocked={unlockedBadges} isKids={isKids} limit={5} />
           </section>
         </main>

@@ -1,10 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { evaluateAIReasoning } from "@/lib/ai";
-import { Challenge } from "@/lib/types";
+import { evaluateAIReasoning, evaluateGamePerformance } from "@/lib/ai";
+import { Challenge, ChallengeDifficulty } from "@/lib/types";
+import { isGameId } from "@/lib/games/catalog";
+import { sanitizeResult } from "@/lib/games/scoring";
+import type { GameResult } from "@/lib/games/types";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
+
+    // Interactive games: score from measured performance, AI writes the review
+    if (body.gameResult) {
+      const raw = body.gameResult as GameResult;
+      const difficulties: ChallengeDifficulty[] = ["easy", "medium", "hard", "expert"];
+      if (!isGameId(raw.gameId) || !difficulties.includes(raw.difficulty)) {
+        return NextResponse.json({ error: "Invalid game result." }, { status: 400 });
+      }
+      const evaluation = await evaluateGamePerformance(sanitizeResult(raw));
+      return NextResponse.json(evaluation);
+    }
+
     const { challenge, userReasoning } = body;
 
     if (!challenge || typeof userReasoning !== "string") {

@@ -27,6 +27,21 @@ export const CATEGORY_TONE: Record<ChallengeCategory, Tone> = {
   kids_math: "blue",
   kids_creative: "amber",
   kids_word: "green",
+  "color-detective": "amber",
+  "whats-behind": "brand",
+  "odd-one": "sky",
+  "shadow-guess": "blue",
+  "memory-match": "green",
+  "where-belongs": "amber",
+  "what-changed": "sky",
+  "number-hunt": "blue",
+  "crack-code": "brand",
+  "tile-path": "blue",
+  "memory-grid": "green",
+  "rotate-it": "sky",
+  "escape-grid": "amber",
+  sudocode: "brand",
+  "spot-change": "blue",
 };
 
 export const DIFFICULTY_TONE: Record<ChallengeDifficulty, Tone> = {

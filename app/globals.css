@@ -2,7 +2,8 @@
 
 /* PuzzlePal design tokens — "Premium EdTech + Playful Intelligence" */
 @theme {
-  --color-brand-50: #f3f1ff;
+  --color-brand-50: #eef2ff;
+  --color-slate-50: #f7f9fc;
   --color-brand-100: #e8e5ff;
   --color-brand-200: #d2ccff;
   --color-brand-300: #b2a8ff;
@@ -22,6 +23,7 @@
   --animate-fade-up: fade-up 0.35s ease-out both;
   --animate-pop: pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
   --animate-grow: grow 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-shake: shake 0.35s ease-in-out;
 
   @keyframes fade-up {
     from { opacity: 0; transform: translateY(6px); }
@@ -35,10 +37,20 @@
     from { transform: scaleX(0); }
     to { transform: scaleX(1); }
   }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
 }
 
+/* Game timing helpers */
+@keyframes shrink { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+@keyframes fade-out { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+
 :root {
-  --background: #f8fafc;
+  --background: #f7f9fc;
   --foreground: #111827;
 }
 

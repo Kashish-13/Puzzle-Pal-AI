@@ -7,6 +7,8 @@ import Navbar from "@/components/Navbar";
 import CategoryBadge from "@/components/CategoryBadge";
 import DifficultyBadge from "@/components/DifficultyBadge";
 import ScoreBreakdownCard from "@/components/ScoreBreakdownCard";
+import ResultCard from "@/components/games/ResultCard";
+import { GAMES, gamesForMode } from "@/lib/games/catalog";
 import Icon, { CategoryIcon } from "@/components/Icon";
 import SkeletonList from "@/components/Skeleton";
 import { scoreTone } from "@/components/RecentActivityList";
@@ -78,27 +80,10 @@ export default function HistoryPage() {
     };
   }, [user, selectedCategory]);
 
-  const filterTabs: { key: ChallengeCategory | "all"; label: string }[] = isKids
-    ? [
-        { key: "all", label: "All puzzles" },
-        { key: "kids_mystery", label: "Detective" },
-        { key: "kids_brain_teaser", label: "Brain Teasers" },
-        { key: "kids_pattern", label: "Patterns" },
-        { key: "kids_math", label: "Math" },
-        { key: "kids_creative", label: "Creative" },
-        { key: "kids_word", label: "Words" },
-      ]
-    : [
-        { key: "all", label: "All" },
-        { key: "business", label: "Business" },
-        { key: "technical", label: "Technical" },
-        { key: "data", label: "Data" },
-        { key: "logic", label: "Logic" },
-        { key: "mystery", label: "Mystery" },
-        { key: "decision", label: "Decision" },
-        { key: "aptitude", label: "Aptitude" },
-        { key: "word", label: "Verbal" },
-      ];
+  const filterTabs: { key: ChallengeCategory | "all"; label: string }[] = [
+    { key: "all", label: isKids ? "All puzzles" : "All" },
+    ...gamesForMode(profile?.userType).map((id) => ({ key: id as ChallengeCategory, label: GAMES[id].name })),
+  ];
 
   const totalCompletions = history.length;
   const avgScore =
@@ -305,22 +290,33 @@ export default function HistoryPage() {
                 </div>
 
                 <div className="p-4 sm:p-6 space-y-4">
-                  <section className="panel p-5">
-                    <h3 className="text-sm font-semibold text-ink mb-1.5">
-                      {isKids ? "Your answer" : "Your submitted reasoning"}
-                    </h3>
-                    <p className="text-sm text-slate-700 whitespace-pre-line leading-relaxed">
-                      {selectedRecord.reasoning}
-                    </p>
-                  </section>
+                  {selectedRecord.evaluation?.gameStats ? (
+                    <ResultCard
+                      evaluation={selectedRecord.evaluation}
+                      difficulty={selectedRecord.difficulty}
+                      xpEarned={selectedRecord.xpEarned}
+                      compact
+                    />
+                  ) : (
+                    <>
+                      <section className="panel p-5">
+                        <h3 className="text-sm font-semibold text-ink mb-1.5">
+                          {isKids ? "Your answer" : "Your submitted reasoning"}
+                        </h3>
+                        <p className="text-sm text-slate-700 whitespace-pre-line leading-relaxed">
+                          {selectedRecord.reasoning}
+                        </p>
+                      </section>
 
-                  <ScoreBreakdownCard
-                    evaluation={selectedRecord.evaluation}
-                    xpEarned={selectedRecord.xpEarned}
-                    userType={selectedRecord.userType || (isKids ? "kids" : "student")}
-                    onNextChallenge={() => setSelectedRecord(null)}
-                    nextChallengeLabel="Close details"
-                  />
+                      <ScoreBreakdownCard
+                        evaluation={selectedRecord.evaluation}
+                        xpEarned={selectedRecord.xpEarned}
+                        userType={selectedRecord.userType || (isKids ? "kids" : "student")}
+                        onNextChallenge={() => setSelectedRecord(null)}
+                        nextChallengeLabel="Close details"
+                      />
+                    </>
+                  )}
                 </div>
               </div>
             </div>
