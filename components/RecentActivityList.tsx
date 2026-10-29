@@ -51,7 +51,7 @@ export default function RecentActivityList({
       {records.map((rec) => {
         const tone = TONES[CATEGORY_TONE[rec.category] || "brand"];
         return (
-          <li key={rec.id} className="p-4 sm:px-5 flex items-center gap-4 transition-colors hover:bg-slate-50/80 first:rounded-t-2xl last:rounded-b-2xl">
+          <li key={rec.id} className="p-4 sm:px-5 flex items-center gap-4 transition-colors hover:bg-brand-50/40 first:rounded-t-2xl last:rounded-b-2xl">
             <span className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${tone.soft}`}>
               <CategoryIcon category={rec.category} className="w-[18px] h-[18px]" />
             </span>

@@ -63,7 +63,7 @@ export default function Navbar() {
     !href.includes("#") && (pathname === href || (href === "/challenge" && pathname.startsWith("/challenge")));
 
   return (
-    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/80 border-b border-slate-200">
+    <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-md supports-[backdrop-filter]:bg-white/70 border-b border-[#e4e6f3] shadow-[0_1px_0_rgba(255,255,255,0.6)]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
         {/* Brand & Primary Navigation */}
         <div className="flex items-center gap-8">

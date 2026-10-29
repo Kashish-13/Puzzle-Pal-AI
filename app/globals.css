@@ -17,8 +17,8 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 2px 8px -2px rgba(15, 23, 42, 0.05);
-  --shadow-lift: 0 16px 32px -12px rgba(15, 23, 42, 0.16), 0 4px 10px -4px rgba(15, 23, 42, 0.06);
+  --shadow-card: 0 1px 2px rgba(30, 27, 75, 0.04), 0 4px 14px -6px rgba(67, 56, 202, 0.09);
+  --shadow-lift: 0 18px 36px -14px rgba(49, 46, 129, 0.22), 0 4px 10px -4px rgba(15, 23, 42, 0.06);
   --shadow-glow: 0 10px 30px -10px rgba(91, 75, 255, 0.35);
 
   --animate-fade-up: fade-up 0.35s ease-out both;
@@ -51,7 +51,7 @@
 @keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
 
 :root {
-  --background: #f7f9fc;
+  --background: #f3f4fb;
   --foreground: #111827;
 }
 
@@ -86,12 +86,32 @@ body {
   .eyebrow { @apply text-xs font-semibold uppercase tracking-[0.08em] text-brand-600; }
 
   .panel {
-    @apply rounded-2xl border border-slate-200/80 bg-white shadow-card;
+    @apply rounded-2xl border border-[#e4e6f3] bg-white shadow-card;
   }
   /* White card with a soft brand wash in one corner */
   .panel-tint {
-    @apply rounded-2xl border border-slate-200/80 shadow-card bg-[radial-gradient(120%_80%_at_100%_0%,rgba(91,75,255,0.07),transparent_55%),linear-gradient(#ffffff,#ffffff)];
+    @apply rounded-2xl border border-[#e4e6f3] shadow-card bg-[radial-gradient(120%_90%_at_100%_0%,rgba(91,75,255,0.10),transparent_55%),radial-gradient(90%_70%_at_0%_100%,rgba(59,130,246,0.06),transparent_60%),linear-gradient(#ffffff,#ffffff)];
   }
+  /* Soft lavender/blue header band used for page intros */
+  .page-hero {
+    @apply relative overflow-hidden rounded-2xl border border-white/80 p-6 sm:p-8 shadow-card;
+    background-image:
+      radial-gradient(38rem 16rem at 100% 0%, rgba(59, 130, 246, 0.13), transparent 62%),
+      radial-gradient(34rem 18rem at 0% 110%, rgba(91, 75, 255, 0.14), transparent 62%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(238, 242, 255, 0.85));
+  }
+  .page-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 0 auto;
+    width: 45%;
+    pointer-events: none;
+    background-image: radial-gradient(rgba(91, 75, 255, 0.16) 1px, transparent 1px);
+    background-size: 16px 16px;
+    -webkit-mask-image: linear-gradient(to left, #000, transparent);
+    mask-image: linear-gradient(to left, #000, transparent);
+  }
+  .page-hero > * { position: relative; z-index: 1; }
   .card-interactive {
     @apply transition-all duration-300 ease-out hover:-translate-y-1 hover:border-brand-200 hover:shadow-lift;
   }
@@ -114,10 +134,13 @@ body {
   .canvas {
     position: relative;
     isolation: isolate;
-    background-color: #f4f6fb;
+    background-color: #f3f4fb;
     background-image:
-      radial-gradient(56rem 28rem at -8% -6%, rgba(91, 75, 255, 0.09), transparent 62%),
-      radial-gradient(48rem 26rem at 108% -2%, rgba(59, 130, 246, 0.08), transparent 62%);
+      radial-gradient(60rem 32rem at -10% -8%, rgba(91, 75, 255, 0.15), transparent 60%),
+      radial-gradient(52rem 30rem at 110% -4%, rgba(59, 130, 246, 0.12), transparent 60%),
+      radial-gradient(44rem 36rem at -14% 58%, rgba(139, 125, 255, 0.09), transparent 65%),
+      radial-gradient(48rem 36rem at 114% 92%, rgba(59, 130, 246, 0.08), transparent 65%),
+      linear-gradient(180deg, #efeefe 0%, #f3f5fc 38%, #f5f7fc 100%);
     background-repeat: no-repeat;
   }
   .canvas::before {
@@ -134,11 +157,20 @@ body {
   }
   /* Kids: warmer, more colorful wash */
   .canvas-kids {
-    background-color: #f6f8fc;
+    background-color: #f2f6fc;
     background-image:
-      radial-gradient(52rem 26rem at -6% -8%, rgba(14, 165, 233, 0.11), transparent 62%),
-      radial-gradient(44rem 24rem at 106% -4%, rgba(91, 75, 255, 0.09), transparent 62%),
-      radial-gradient(36rem 22rem at 60% 108%, rgba(245, 158, 11, 0.06), transparent 65%);
+      radial-gradient(56rem 30rem at -8% -8%, rgba(14, 165, 233, 0.15), transparent 60%),
+      radial-gradient(48rem 28rem at 108% -4%, rgba(91, 75, 255, 0.12), transparent 60%),
+      radial-gradient(40rem 32rem at -12% 62%, rgba(139, 125, 255, 0.08), transparent 65%),
+      radial-gradient(40rem 26rem at 70% 104%, rgba(245, 158, 11, 0.08), transparent 65%),
+      linear-gradient(180deg, #ecf5fe 0%, #f2f5fc 40%, #f5f7fc 100%);
+  }
+  .canvas-kids .page-hero {
+    @apply rounded-3xl;
+    background-image:
+      radial-gradient(38rem 16rem at 100% 0%, rgba(14, 165, 233, 0.15), transparent 62%),
+      radial-gradient(34rem 18rem at 0% 110%, rgba(245, 158, 11, 0.10), transparent 62%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(238, 246, 255, 0.88));
   }
   .page-enter { @apply animate-fade-up; }
 }

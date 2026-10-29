@@ -63,7 +63,7 @@ export default function ChallengeSelectionPage() {
 
         <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-8 page-enter">
           {/* Header */}
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+          <div className="page-hero flex flex-col lg:flex-row lg:items-end justify-between gap-6">
             <div>
               <nav className="flex items-center gap-1.5 text-sm text-slate-500" aria-label="Breadcrumb">
                 <Link href="/dashboard" className="hover:text-ink transition-colors">

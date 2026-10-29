@@ -9,6 +9,7 @@ import StatsCard from "@/components/StatsCard";
 import Icon, { CategoryIcon } from "@/components/Icon";
 import AchievementGrid from "@/components/AchievementGrid";
 import RecentActivityList from "@/components/RecentActivityList";
+import SectionHeader from "@/components/SectionHeader";
 import { CATEGORY_TONE, TONES } from "@/components/tokens";
 import { useAuth } from "@/lib/auth";
 import {
@@ -155,31 +156,99 @@ export default function ProfilePage() {
 
         <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-10 page-enter">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <div>
-              <nav className="flex items-center gap-1.5 text-sm text-slate-500" aria-label="Breadcrumb">
-                <Link href="/dashboard" className="hover:text-ink transition-colors">
-                  {isKids ? "Home" : "Dashboard"}
-                </Link>
-                <span className="text-slate-300">/</span>
-                <span className="text-slate-700">Profile</span>
-              </nav>
-              <h1 className="mt-2 text-2xl sm:text-3xl font-semibold tracking-tight text-ink">Your profile</h1>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() => (isEditing ? setIsEditing(false) : handleStartEditing())}
-                className="btn btn-secondary"
-              >
-                {isEditing ? "Cancel editing" : "Edit profile"}
-              </button>
-              <Link href="/history" className="btn btn-primary">
-                Review progress
-                <Icon name="arrowRight" className="w-4 h-4" />
+          <div className="space-y-4">
+            <nav className="flex items-center gap-1.5 text-sm text-slate-500" aria-label="Breadcrumb">
+              <Link href="/dashboard" className="hover:text-ink transition-colors">
+                {isKids ? "Home" : "Dashboard"}
               </Link>
-            </div>
+              <span className="text-slate-300">/</span>
+              <span className="text-slate-700">Profile</span>
+            </nav>
+
+            {/* Profile hero: identity, mode, actions and level progress */}
+            <section
+              className={`relative overflow-hidden ${radius} text-white ${
+                isKids ? "bg-gradient-to-br from-brand-600 via-brand-500 to-sky-500" : "bg-gradient-to-br from-brand-700 via-brand-600 to-blue-600"
+              }`}
+            >
+              <div className="absolute -top-24 left-1/3 w-72 h-72 rounded-full bg-white/10 blur-3xl" aria-hidden="true" />
+              <div className="absolute -bottom-32 -right-10 w-80 h-80 rounded-full bg-blue-400/30 blur-3xl" aria-hidden="true" />
+              <div
+                className="absolute inset-y-0 left-0 w-1/2 opacity-30 bg-[radial-gradient(rgba(255,255,255,0.35)_1px,transparent_1px)] [background-size:18px_18px] [mask-image:linear-gradient(to_right,#000,transparent)]"
+                aria-hidden="true"
+              />
+
+              <div className="relative grid grid-cols-1 lg:grid-cols-5 gap-6 p-6 sm:p-8 lg:p-10">
+                <div className="lg:col-span-3 flex flex-col justify-between gap-6">
+                  <div className="flex items-center gap-4 sm:gap-5">
+                    <span className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/15 p-1 ring-1 ring-white/30 backdrop-blur shrink-0">
+                      <span className="w-full h-full rounded-xl bg-white text-brand-700 text-2xl sm:text-3xl font-semibold flex items-center justify-center shadow-[0_10px_24px_-10px_rgba(15,23,42,0.5)]">
+                        {displayName.charAt(0).toUpperCase() || "?"}
+                      </span>
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/70">Your profile</p>
+                      <h1 className="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight truncate">{displayName}</h1>
+                      <p className="mt-1 text-sm text-white/80">
+                        {levelTitle} · {isKids ? `Age ${profile?.ageRange || "8–13"}` : profile?.academicLevel || "Student / Pro"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 text-xs">
+                    <Link
+                      href="/onboarding"
+                      className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 font-medium ring-1 ring-white/20 hover:bg-white/25 transition-colors"
+                      title="Switch between Kids and Student learning modes"
+                    >
+                      <Icon name={isKids ? "smile" : "graduationCap"} className="w-3.5 h-3.5" />
+                      {isKids ? "Kids mode" : "Student mode"}
+                      <Icon name="arrowLeftRight" className="w-3 h-3 text-white/70" />
+                    </Link>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 font-medium ring-1 ring-white/20">
+                      <Icon name="activity" className="w-3.5 h-3.5" />
+                      Adaptive <span className="capitalize">{difficulty}</span>
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 font-medium ring-1 ring-white/20">
+                      <Icon name="award" className="w-3.5 h-3.5" />
+                      {unlockedBadges.length} {isKids ? "trophies" : "achievements"}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Link href="/history" className="btn bg-white text-brand-700 hover:bg-brand-50 hover:-translate-y-px shadow-lift">
+                      Review progress
+                      <Icon name="arrowRight" className="w-4 h-4" />
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => (isEditing ? setIsEditing(false) : handleStartEditing())}
+                      className="btn bg-white/10 text-white ring-1 ring-inset ring-white/30 hover:bg-white/20"
+                    >
+                      <Icon name="pen" className="w-4 h-4" />
+                      {isEditing ? "Cancel editing" : "Edit profile"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-2 flex items-center">
+                  <div className="w-full rounded-2xl bg-white/95 text-ink ring-1 ring-white/60 p-5 sm:p-6 shadow-[0_24px_48px_-16px_rgba(15,23,42,0.45)]">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">Level {level}</p>
+                        <p className="mt-0.5 text-lg font-semibold text-ink">{levelTitle}</p>
+                      </div>
+                      <span className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 text-white flex items-center justify-center shadow-[0_8px_18px_-8px_rgba(245,158,11,0.7)]">
+                        <Icon name="trophy" className="w-5 h-5" />
+                      </span>
+                    </div>
+                    <div className="mt-5">
+                      <ProgressBar xp={xp} level={level} levelTitle={undefined} userType={userType} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
           </div>
 
           {(saveSuccess || saveError) && (
@@ -201,8 +270,8 @@ export default function ProfilePage() {
 
           {/* Edit Profile Form */}
           {isEditing && (
-            <form onSubmit={handleSaveProfile} className="panel p-6 sm:p-8 space-y-6 animate-fade-up">
-              <h2 className="text-base font-semibold text-ink">Edit profile</h2>
+            <form onSubmit={handleSaveProfile} className={`panel-tint ${radius} p-6 sm:p-8 space-y-6 animate-fade-up`}>
+              <SectionHeader title="Edit profile" />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
@@ -311,38 +380,9 @@ export default function ProfilePage() {
             </form>
           )}
 
-          {/* Profile information */}
-          <section className={`panel ${radius} overflow-hidden`}>
-            <div className={`h-20 ${isKids ? "bg-gradient-to-r from-sky-100 via-brand-100 to-amber-100" : "bg-gradient-to-r from-brand-600 to-brand-500"}`} />
-            <div className="px-6 pb-6 -mt-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-              <div className="flex items-end gap-4">
-                <span className="w-16 h-16 rounded-2xl bg-white p-1 shadow-card shrink-0">
-                  <span className="w-full h-full rounded-xl bg-brand-600 text-white text-2xl font-semibold flex items-center justify-center">
-                    {displayName.charAt(0).toUpperCase() || "?"}
-                  </span>
-                </span>
-                <div className="pb-0.5 min-w-0">
-                  <h2 className="text-lg font-semibold text-ink truncate">{displayName}</h2>
-                  <p className="text-sm text-slate-500">
-                    {levelTitle} · {isKids ? `Age ${profile?.ageRange || "8–13"}` : profile?.academicLevel || "Student / Pro"} · Adaptive{" "}
-                    <span className="capitalize">{difficulty}</span>
-                  </p>
-                </div>
-              </div>
-              <Link
-                href="/onboarding"
-                className="inline-flex items-center gap-2 self-start sm:self-auto rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:border-slate-300 transition-colors"
-                title="Switch between Kids and Student learning modes"
-              >
-                <Icon name={isKids ? "smile" : "graduationCap"} className={`w-4 h-4 ${isKids ? "text-sky-600" : "text-brand-600"}`} />
-                {isKids ? "Kids mode" : "Student mode"}
-                <Icon name="arrowLeftRight" className="w-3.5 h-3.5 text-slate-400" />
-              </Link>
-            </div>
-          </section>
-
-          {/* Metrics + level */}
-          <section className="space-y-3">
+          {/* Metrics */}
+          <section>
+            <SectionHeader title={isKids ? "Your numbers" : "Statistics"} />
             <StatsCard
               playful={isKids}
               items={[
@@ -359,25 +399,33 @@ export default function ProfilePage() {
                 },
               ]}
             />
-            <div className={`panel ${radius} p-5 sm:p-6`}>
-              <ProgressBar xp={xp} level={level} levelTitle={levelTitle} userType={userType} />
-            </div>
           </section>
 
           {/* Achievements (supports #trophies link from Kids navbar) */}
           <section id="trophies" className="scroll-mt-24">
-            <div className={`panel ${radius} p-5 sm:p-6 mb-4 flex flex-col sm:flex-row sm:items-center gap-4 justify-between`}>
-              <div>
-                <h2 className="text-base font-semibold text-ink">{isKids ? "Trophies" : "Achievements"}</h2>
-                <p className="text-sm text-slate-500 mt-0.5">
-                  <span className="font-medium text-ink">{unlockedBadges.length} of {AVAILABLE_BADGES.length}</span>{" "}
-                  {isKids ? "trophies" : "achievements"} unlocked
-                </p>
+            <div className={`panel-tint ${radius} p-5 sm:p-6 mb-4 flex flex-col sm:flex-row sm:items-center gap-4 justify-between`}>
+              <div className="flex items-center gap-4">
+                <span
+                  className={`w-11 h-11 rounded-xl flex items-center justify-center text-white shrink-0 ${
+                    isKids
+                      ? "bg-gradient-to-br from-amber-400 to-amber-500 shadow-[0_8px_18px_-8px_rgba(245,158,11,0.7)]"
+                      : "bg-gradient-to-br from-brand-500 to-brand-600 shadow-[0_8px_18px_-8px_rgba(91,75,255,0.7)]"
+                  }`}
+                >
+                  <Icon name="award" className="w-5 h-5" />
+                </span>
+                <div>
+                  <h2 className="text-base font-semibold tracking-tight text-ink">{isKids ? "Trophies" : "Achievements"}</h2>
+                  <p className="text-sm text-slate-500 mt-0.5">
+                    <span className="font-medium text-ink">{unlockedBadges.length} of {AVAILABLE_BADGES.length}</span>{" "}
+                    {isKids ? "trophies" : "achievements"} unlocked
+                  </p>
+                </div>
               </div>
               <div className="sm:w-64">
                 <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
                   <div
-                    className={`h-full rounded-full origin-left animate-grow ${isKids ? "bg-amber-500" : "bg-brand-600"}`}
+                    className={`h-full rounded-full origin-left animate-grow ${isKids ? "bg-gradient-to-r from-amber-400 to-amber-500" : "bg-gradient-to-r from-brand-500 to-blue-500"}`}
                     style={{ width: `${unlockedPct}%` }}
                   />
                 </div>
@@ -390,9 +438,7 @@ export default function ProfilePage() {
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Category strengths */}
             <div>
-              <h2 className="text-base font-semibold text-ink mb-3">
-                {isKids ? "Puzzle strengths" : "Reasoning by category"}
-              </h2>
+              <SectionHeader title={isKids ? "Puzzle strengths" : "Reasoning by category"} />
               <div className={`panel ${radius} p-5`}>
                 {loadingStrengths ? (
                   <div className="space-y-4" aria-busy="true">
@@ -427,7 +473,7 @@ export default function ProfilePage() {
                           </div>
                           <div className="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
                             <div
-                              className={`h-full rounded-full origin-left animate-grow ${isKids ? tone.solid : pct >= 80 ? "bg-green-500" : "bg-brand-600"}`}
+                              className={`h-full rounded-full origin-left animate-grow ${isKids ? tone.solid : pct >= 80 ? "bg-gradient-to-r from-green-400 to-green-500" : "bg-gradient-to-r from-brand-500 to-blue-500"}`}
                               style={{ width: `${pct}%` }}
                             />
                           </div>
@@ -441,43 +487,41 @@ export default function ProfilePage() {
 
             {/* Recent activity */}
             <div>
-              <div className="flex items-baseline justify-between gap-4 mb-3">
-                <h2 className="text-base font-semibold text-ink">Recent activity</h2>
-                {recent.length > 0 && (
-                  <Link href="/history" className="text-sm font-medium text-brand-600 hover:text-brand-700">
-                    View history
-                  </Link>
-                )}
-              </div>
+              <SectionHeader
+                title="Recent activity"
+                action={recent.length > 0 ? { href: "/history", label: "View history" } : undefined}
+              />
               <RecentActivityList records={recent} />
             </div>
           </section>
 
           {/* Account details */}
-          <section className="panel p-5 sm:p-6">
+          <section className={`panel ${radius} p-5 sm:p-6`}>
             <div className="flex items-center justify-between gap-4 mb-4">
-              <h2 className="text-base font-semibold text-ink">Account details</h2>
+              <h2 className="relative pl-3 text-base font-semibold tracking-tight text-ink before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-4 before:w-1 before:rounded-full before:bg-gradient-to-b before:from-brand-500 before:to-blue-500">
+                Account details
+              </h2>
               <button type="button" onClick={() => logout()} className="btn btn-sm btn-ghost">
                 <Icon name="logOut" className="w-4 h-4" />
                 Sign out
               </button>
             </div>
-            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-3 text-sm">
-              <div className="flex flex-col sm:flex-row sm:gap-2 min-w-0">
-                <dt className="text-slate-500 shrink-0">Email</dt>
-                <dd className="text-slate-700 break-all">{user?.email || "—"}</dd>
+            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              <div className="rounded-xl border border-slate-100 bg-slate-50/70 px-4 py-3 min-w-0">
+                <dt className="text-xs font-medium uppercase tracking-[0.08em] text-slate-400">Email</dt>
+                <dd className="mt-1 text-slate-700 break-all">{user?.email || "—"}</dd>
               </div>
-              <div className="flex flex-col sm:flex-row sm:gap-2 min-w-0">
-                <dt className="text-slate-500 shrink-0">Account ID</dt>
-                <dd className="text-slate-700 font-mono text-xs sm:text-sm break-all">{user?.uid || "—"}</dd>
+              <div className="rounded-xl border border-slate-100 bg-slate-50/70 px-4 py-3 min-w-0">
+                <dt className="text-xs font-medium uppercase tracking-[0.08em] text-slate-400">Account ID</dt>
+                <dd className="mt-1 text-slate-700 font-mono text-xs sm:text-sm break-all">{user?.uid || "—"}</dd>
               </div>
-              <div className="flex flex-col sm:flex-row sm:gap-2">
-                <dt className="text-slate-500 shrink-0">Storage</dt>
-                <dd className="text-slate-700">Firebase Firestore (protected)</dd>
+              <div className="rounded-xl border border-slate-100 bg-slate-50/70 px-4 py-3">
+                <dt className="text-xs font-medium uppercase tracking-[0.08em] text-slate-400">Storage</dt>
+                <dd className="mt-1 text-slate-700">Firebase Firestore (protected)</dd>
               </div>
-              <div className="flex flex-col sm:flex-row sm:gap-2">
-                <dt className="text-slate-500 shrink-0">AI engine</dt>
-                <dd className="text-slate-700">OpenAI server API with fallback</dd>
+              <div className="rounded-xl border border-slate-100 bg-slate-50/70 px-4 py-3">
+                <dt className="text-xs font-medium uppercase tracking-[0.08em] text-slate-400">AI engine</dt>
+                <dd className="mt-1 text-slate-700">OpenAI server API with fallback</dd>
               </div>
             </dl>
           </section>

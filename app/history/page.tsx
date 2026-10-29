@@ -106,7 +106,7 @@ export default function HistoryPage() {
 
         <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-8 page-enter">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div className="page-hero flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <nav className="flex items-center gap-1.5 text-sm text-slate-500" aria-label="Breadcrumb">
                 <Link href="/dashboard" className="hover:text-ink transition-colors">
@@ -143,9 +143,9 @@ export default function HistoryPage() {
               },
               { label: "XP earned", value: totalXPEarned, icon: "zap" as const, tone: "bg-amber-50 text-amber-600" },
             ].map((m) => (
-              <div key={m.label} className="panel p-4 sm:p-5">
+              <div key={m.label} className={`panel p-4 sm:p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lift ${isKids ? "rounded-3xl" : ""}`}>
                 <div className="flex items-center gap-2">
-                  <span className={`hidden sm:flex w-7 h-7 rounded-lg items-center justify-center ${m.tone}`}>
+                  <span className={`hidden sm:flex w-8 h-8 rounded-xl items-center justify-center ring-1 ring-inset ring-slate-900/5 ${m.tone}`}>
                     <Icon name={m.icon} className="w-4 h-4" />
                   </span>
                   <dt className="text-xs sm:text-sm text-slate-500">{m.label}</dt>
@@ -157,7 +157,7 @@ export default function HistoryPage() {
 
           <div className="space-y-4">
             {/* Category filter */}
-            <div className="border-b border-slate-200 overflow-x-auto">
+            <div className="border-b border-[#e4e6f3] overflow-x-auto">
               <div className="flex gap-6 min-w-max" role="tablist">
                 {filterTabs.map((tab) => {
                   const isSelected = selectedCategory === tab.key;
@@ -214,7 +214,7 @@ export default function HistoryPage() {
                       <button
                         type="button"
                         onClick={() => setSelectedRecord(record)}
-                        className="group w-full text-left p-4 sm:px-5 sm:py-4 flex items-center gap-4 hover:bg-slate-50 transition-colors"
+                        className="group w-full text-left p-4 sm:px-5 sm:py-4 flex items-center gap-4 hover:bg-brand-50/40 transition-colors"
                       >
                         <span className={`hidden sm:flex w-10 h-10 rounded-xl items-center justify-center shrink-0 ${tone.soft}`}>
                           <CategoryIcon category={record.category} className="w-[18px] h-[18px]" />
