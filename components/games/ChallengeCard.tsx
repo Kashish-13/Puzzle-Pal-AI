@@ -14,11 +14,19 @@ export interface GameStatsSummary {
 }
 
 const PREVIEW_BG: Record<string, string> = {
-  brand: "from-brand-50 to-white",
-  blue: "from-blue-50 to-white",
-  green: "from-green-50 to-white",
-  amber: "from-amber-50 to-white",
-  sky: "from-sky-50 to-white",
+  brand: "from-brand-50 via-brand-50/40 to-white",
+  blue: "from-blue-50 via-blue-50/40 to-white",
+  green: "from-green-50 via-green-50/40 to-white",
+  amber: "from-amber-50 via-amber-50/40 to-white",
+  sky: "from-sky-50 via-sky-50/40 to-white",
+};
+
+const GLOW: Record<string, string> = {
+  brand: "bg-brand-300/40",
+  blue: "bg-blue-300/40",
+  green: "bg-green-300/40",
+  amber: "bg-amber-300/40",
+  sky: "bg-sky-300/40",
 };
 
 /** Visual game card: preview, name, description, difficulty/XP, progress and CTA. */
@@ -43,14 +51,16 @@ export default function ChallengeCard({
       href={`/challenge/session?game=${gameId}&difficulty=${difficulty}`}
       className={`group panel card-interactive overflow-hidden flex flex-col ${playful ? "rounded-3xl" : ""}`}
     >
-      <div className={`relative h-36 bg-gradient-to-b ${PREVIEW_BG[toneKey]} border-b border-slate-100 flex items-center justify-center`}>
-        <div className="transition-transform duration-300 group-hover:scale-[1.04]">
+      <div className={`relative ${playful ? "h-40" : "h-36"} overflow-hidden bg-gradient-to-b ${PREVIEW_BG[toneKey]} border-b border-slate-100 flex items-center justify-center`}>
+        <div className="absolute inset-0 dots opacity-60 [mask-image:radial-gradient(70%_70%_at_50%_45%,#000,transparent)]" aria-hidden="true" />
+        <div className={`absolute w-40 h-40 rounded-full blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 ${GLOW[toneKey]}`} aria-hidden="true" />
+        <div className="relative transition-transform duration-500 ease-out group-hover:scale-[1.06] group-hover:-translate-y-0.5">
           <ChallengePreview gameId={gameId} />
         </div>
         {played && (
           <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-white/90 border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-green-700">
             <Icon name="checkCircle" className="w-3 h-3" />
-            Best {stats!.best.toFixed(1)}
+            Best {stats!.best.toFixed(1)} · {stats!.plays} {stats!.plays === 1 ? "play" : "plays"}
           </span>
         )}
       </div>
@@ -71,8 +81,8 @@ export default function ChallengeCard({
 
         <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
           <DifficultyBadge difficulty={difficulty} size="sm" />
-          <span className="inline-flex items-center gap-1 text-sm font-medium text-brand-600">
-            {played ? `Play again · ${stats!.plays}` : "Play"}
+          <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 -mr-1 whitespace-nowrap text-sm font-medium text-brand-600 transition-colors duration-200 group-hover:bg-brand-600 group-hover:text-white">
+            {played ? "Play again" : "Play"}
             <Icon name="arrowRight" className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
           </span>
         </div>

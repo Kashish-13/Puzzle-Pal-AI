@@ -126,7 +126,7 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-slate-50 text-ink flex flex-col">
+      <div className={`min-h-screen text-ink flex flex-col canvas ${isKids ? "canvas-kids" : ""}`}>
         <Navbar />
 
         <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-10 page-enter">
@@ -166,7 +166,9 @@ export default function DashboardPage() {
             }`}
           >
             <ReasoningGraph className="hidden md:block absolute -left-16 -bottom-24 w-96 opacity-[0.12] [&_circle]:fill-white [&_line]:stroke-white" />
-            <div className="relative grid grid-cols-1 md:grid-cols-5 gap-6 p-6 sm:p-8">
+            <div className="absolute -top-24 right-1/4 w-72 h-72 rounded-full bg-white/10 blur-3xl" aria-hidden="true" />
+            <div className="absolute -bottom-28 right-0 w-80 h-80 rounded-full bg-blue-400/30 blur-3xl" aria-hidden="true" />
+            <div className="relative grid grid-cols-1 md:grid-cols-5 gap-6 p-6 sm:p-8 lg:p-10">
               <div className="md:col-span-3 flex flex-col justify-center">
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/70">
                   {isContinuing ? "Continue learning" : "Recommended for you"}
@@ -190,7 +192,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="md:col-span-2 flex items-center justify-center">
-                <div className="rounded-3xl bg-white/95 shadow-lift p-6 sm:p-8 min-w-56 flex items-center justify-center rotate-[-2deg]">
+                <div className="rounded-3xl bg-white/95 ring-1 ring-white/60 shadow-[0_24px_48px_-16px_rgba(15,23,42,0.45)] p-6 sm:p-8 min-w-56 flex items-center justify-center rotate-[-2deg] transition-transform duration-500 hover:rotate-0 hover:scale-[1.02]">
                   <div className="scale-125">
                     <ChallengePreview gameId={heroGame} />
                   </div>
@@ -201,7 +203,7 @@ export default function DashboardPage() {
 
           {/* Progress */}
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className={`panel ${radius} p-5 sm:p-6 lg:col-span-1 flex flex-col justify-between`}>
+            <div className={`panel-tint ${radius} p-5 sm:p-6 lg:col-span-1 flex flex-col justify-between`}>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">Level {level}</p>
                 <p className="mt-1 text-lg font-semibold text-ink">{levelTitle}</p>

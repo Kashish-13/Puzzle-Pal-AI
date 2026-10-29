@@ -28,17 +28,17 @@ export default function StatsCard({
   return (
     <dl className={`grid grid-cols-2 gap-3 ${columns === 2 ? "" : "md:grid-cols-3 xl:grid-cols-5"}`}>
       {items.map((item) => (
-        <div key={item.label} className={`panel p-4 ${playful ? "rounded-3xl" : ""}`}>
+        <div key={item.label} className={`panel p-4 sm:p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lift ${playful ? "rounded-3xl" : ""}`}>
           <div className="flex items-center gap-2">
             <span
-              className={`w-7 h-7 flex items-center justify-center ${playful ? "rounded-full" : "rounded-lg"} ${TONES[item.tone].soft}`}
+              className={`w-8 h-8 flex items-center justify-center ring-1 ring-inset ring-slate-900/5 ${playful ? "rounded-full" : "rounded-xl"} ${TONES[item.tone].soft}`}
             >
               <Icon name={item.icon} className="w-4 h-4" />
             </span>
             <dt className="text-sm text-slate-500 truncate">{item.label}</dt>
           </div>
-          <dd className="mt-3 text-2xl font-semibold tracking-tight text-ink tabular-nums">{item.value}</dd>
-          {item.subtext && <dd className="mt-0.5 text-xs text-slate-500 truncate">{item.subtext}</dd>}
+          <dd className="mt-3.5 text-[26px] leading-none font-semibold tracking-tight text-ink tabular-nums">{item.value}</dd>
+          {item.subtext && <dd className="mt-1.5 text-xs text-slate-500 truncate">{item.subtext}</dd>}
         </div>
       ))}
     </dl>

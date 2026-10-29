@@ -24,12 +24,12 @@ export default function AchievementGrid({ unlocked, isKids = false, limit }: Ach
         return (
           <li
             key={badge.id}
-            className={`relative rounded-2xl border p-4 transition-colors ${
+            className={`relative rounded-2xl border p-4 transition-all duration-300 hover:-translate-y-0.5 ${
               isUnlocked
                 ? isKids
-                  ? "border-amber-200 bg-amber-50/60"
-                  : "border-brand-200 bg-brand-50/50"
-                : "border-dashed border-slate-200 bg-white"
+                  ? "border-amber-200 bg-gradient-to-br from-amber-50 to-white shadow-card hover:shadow-lift"
+                  : "border-brand-200 bg-gradient-to-br from-brand-50 to-white shadow-card hover:shadow-lift"
+                : "border-dashed border-slate-200 bg-white/70"
             }`}
           >
             <div className="flex items-start justify-between gap-2">
@@ -37,8 +37,8 @@ export default function AchievementGrid({ unlocked, isKids = false, limit }: Ach
                 className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                   isUnlocked
                     ? isKids
-                      ? "bg-amber-500 text-white"
-                      : "bg-brand-600 text-white"
+                      ? "bg-gradient-to-br from-amber-400 to-amber-500 text-white shadow-[0_6px_14px_-6px_rgba(245,158,11,0.6)]"
+                      : "bg-gradient-to-br from-brand-500 to-brand-600 text-white shadow-[0_6px_14px_-6px_rgba(91,75,255,0.6)]"
                     : "bg-slate-100 text-slate-400"
                 }`}
               >

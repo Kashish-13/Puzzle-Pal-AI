@@ -38,10 +38,10 @@ function HeroVisual() {
         <ChallengePreview gameId="tile-path" />
       </div>
 
-      <div className="absolute left-4 sm:left-2 bottom-6 panel px-4 py-3 shadow-lift w-52 animate-fade-up" style={{ animationDelay: "320ms" }}>
+      <div className="absolute left-4 sm:left-2 bottom-6 panel px-4 py-3 shadow-lift w-60 animate-fade-up" style={{ animationDelay: "320ms" }}>
         <div className="flex items-center justify-between text-xs text-slate-500">
           <span>Challenge complete</span>
-          <span className="inline-flex items-center gap-1 font-medium text-amber-600"><Icon name="zap" className="w-3 h-3" filled />+100 XP</span>
+          <span className="inline-flex items-center gap-1 whitespace-nowrap font-medium text-amber-600"><Icon name="zap" className="w-3 h-3" filled />+100 XP</span>
         </div>
         <div className="mt-1 flex items-baseline gap-1.5">
           <span className="text-2xl font-semibold text-ink tabular-nums">86%</span>
@@ -84,12 +84,12 @@ export default function LandingPage() {
   const shown = activeTab === "student" ? STUDENT_GAMES : KIDS_GAMES;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-ink flex flex-col">
+    <div className="min-h-screen canvas text-ink flex flex-col">
       <Navbar />
 
       <main className="flex-1">
         {/* Hero */}
-        <section className="bg-white border-b border-slate-200">
+        <section className="relative overflow-hidden border-b border-slate-200/70 bg-gradient-to-b from-white/80 via-white/60 to-transparent">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="page-enter">
               <p className="eyebrow">AI-powered reasoning games</p>
@@ -173,7 +173,7 @@ export default function LandingPage() {
         </section>
 
         {/* Game library */}
-        <section id="games" className="bg-white border-y border-slate-200 scroll-mt-16">
+        <section id="games" className="border-y border-slate-200/70 scroll-mt-16 bg-[radial-gradient(60rem_24rem_at_50%_0%,rgba(91,75,255,0.07),transparent_70%),linear-gradient(180deg,#ffffff,#f8f9fe)]">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
               <div>
@@ -278,7 +278,7 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="border-t border-slate-200 bg-white py-8">
+      <footer className="border-t border-slate-200/70 bg-white/70 backdrop-blur py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm text-slate-500">
           <Logo />
           <span>Think · Solve · Analyze · Improve</span>
