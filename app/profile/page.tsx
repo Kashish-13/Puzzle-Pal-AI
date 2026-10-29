@@ -150,7 +150,7 @@ export default function ProfilePage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-slate-50 text-ink flex flex-col">
+      <div className={`min-h-screen text-ink flex flex-col canvas ${isKids ? "canvas-kids" : ""}`}>
         <Navbar />
 
         <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-10 page-enter">

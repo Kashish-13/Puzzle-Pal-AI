@@ -17,8 +17,9 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.03);
-  --shadow-lift: 0 8px 24px -8px rgba(15, 23, 42, 0.12), 0 2px 6px rgba(15, 23, 42, 0.04);
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 2px 8px -2px rgba(15, 23, 42, 0.05);
+  --shadow-lift: 0 16px 32px -12px rgba(15, 23, 42, 0.16), 0 4px 10px -4px rgba(15, 23, 42, 0.06);
+  --shadow-glow: 0 10px 30px -10px rgba(91, 75, 255, 0.35);
 
   --animate-fade-up: fade-up 0.35s ease-out both;
   --animate-pop: pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
@@ -69,10 +70,10 @@ body {
   .btn-lg { @apply px-5 py-3 text-[15px]; }
 
   .btn-primary {
-    @apply bg-brand-600 text-white shadow-[0_1px_2px_rgba(91,75,255,0.25),inset_0_1px_0_rgba(255,255,255,0.12)] hover:bg-brand-700 hover:shadow-[0_4px_12px_-2px_rgba(91,75,255,0.35)];
+    @apply bg-gradient-to-b from-brand-500 to-brand-600 text-white shadow-[0_1px_2px_rgba(91,75,255,0.3),inset_0_1px_0_rgba(255,255,255,0.18)] hover:-translate-y-px hover:from-brand-600 hover:to-brand-700 hover:shadow-glow;
   }
   .btn-secondary {
-    @apply border border-slate-200 bg-white text-ink shadow-card hover:border-slate-300 hover:bg-slate-50;
+    @apply border border-slate-200 bg-white text-ink shadow-card hover:-translate-y-px hover:border-brand-200 hover:text-brand-700;
   }
   .btn-ghost {
     @apply text-slate-600 hover:bg-slate-100 hover:text-ink;
@@ -84,9 +85,20 @@ body {
   .label { @apply mb-1.5 block text-sm font-medium text-slate-700; }
   .eyebrow { @apply text-xs font-semibold uppercase tracking-[0.08em] text-brand-600; }
 
-  .panel { @apply rounded-2xl border border-slate-200 bg-white shadow-card; }
+  .panel {
+    @apply rounded-2xl border border-slate-200/80 bg-white shadow-card;
+  }
+  /* White card with a soft brand wash in one corner */
+  .panel-tint {
+    @apply rounded-2xl border border-slate-200/80 shadow-card bg-[radial-gradient(120%_80%_at_100%_0%,rgba(91,75,255,0.07),transparent_55%),linear-gradient(#ffffff,#ffffff)];
+  }
   .card-interactive {
-    @apply transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-lift;
+    @apply transition-all duration-300 ease-out hover:-translate-y-1 hover:border-brand-200 hover:shadow-lift;
+  }
+  /* Faint dot texture for preview/board areas */
+  .dots {
+    background-image: radial-gradient(rgba(15, 23, 42, 0.07) 1px, transparent 1px);
+    background-size: 14px 14px;
   }
 
   /* Selectable option: border + tint + check communicate the selected state */
@@ -98,6 +110,36 @@ body {
   }
 
   .skeleton { @apply animate-pulse rounded-md bg-slate-200/70; }
+
+  .canvas {
+    position: relative;
+    isolation: isolate;
+    background-color: #f4f6fb;
+    background-image:
+      radial-gradient(56rem 28rem at -8% -6%, rgba(91, 75, 255, 0.09), transparent 62%),
+      radial-gradient(48rem 26rem at 108% -2%, rgba(59, 130, 246, 0.08), transparent 62%);
+    background-repeat: no-repeat;
+  }
+  .canvas::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 560px;
+    z-index: -1;
+    pointer-events: none;
+    background-image: radial-gradient(rgba(15, 23, 42, 0.06) 1px, transparent 1px);
+    background-size: 22px 22px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
+  }
+  /* Kids: warmer, more colorful wash */
+  .canvas-kids {
+    background-color: #f6f8fc;
+    background-image:
+      radial-gradient(52rem 26rem at -6% -8%, rgba(14, 165, 233, 0.11), transparent 62%),
+      radial-gradient(44rem 24rem at 106% -4%, rgba(91, 75, 255, 0.09), transparent 62%),
+      radial-gradient(36rem 22rem at 60% 108%, rgba(245, 158, 11, 0.06), transparent 65%);
+  }
   .page-enter { @apply animate-fade-up; }
 }
 

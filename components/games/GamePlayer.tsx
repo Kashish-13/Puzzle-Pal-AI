@@ -197,8 +197,9 @@ export default function GamePlayer({
       {phase === "intro" && (
         <div className={`panel ${radius} overflow-hidden page-enter`}>
           <div className="grid grid-cols-1 md:grid-cols-5">
-            <div className={`md:col-span-2 min-h-48 flex items-center justify-center bg-gradient-to-br ${playful ? "from-sky-50 via-white to-amber-50" : "from-brand-50 via-white to-blue-50"} border-b md:border-b-0 md:border-r border-slate-100`}>
-              <div className="scale-125">
+            <div className={`md:col-span-2 min-h-56 relative overflow-hidden flex items-center justify-center bg-gradient-to-br ${playful ? "from-sky-50 via-white to-amber-50" : "from-brand-50 via-white to-blue-50"} border-b md:border-b-0 md:border-r border-slate-100`}>
+              <div className="absolute inset-0 dots opacity-70 [mask-image:radial-gradient(65%_65%_at_50%_50%,#000,transparent)]" aria-hidden="true" />
+              <div className="relative scale-125 animate-pop">
                 <ChallengePreview gameId={gameId} />
               </div>
             </div>
@@ -262,7 +263,7 @@ export default function GamePlayer({
       {(phase === "playing" || phase === "evaluating") && session && progress && (
         <div className="space-y-4">
           {/* Game controls bar */}
-          <div className={`panel ${radius} px-4 py-3 sm:px-5 flex flex-wrap items-center gap-x-6 gap-y-3`}>
+          <div className={`panel ${radius} px-4 py-3 sm:px-5 flex flex-wrap items-center gap-x-6 gap-y-3 bg-white/90 backdrop-blur sticky top-[72px] z-20`}>
             <div className="flex-1 min-w-40">
               <div className="flex items-center justify-between text-xs text-slate-500 mb-1.5">
                 <span>
@@ -319,7 +320,7 @@ export default function GamePlayer({
             </div>
           )}
 
-          <div className={`panel ${radius} p-5 sm:p-8 relative`}>
+          <div className={`panel ${radius} p-5 sm:p-8 relative ${playful ? "bg-[linear-gradient(180deg,rgba(14,165,233,0.06),#fff_42%)]" : "bg-[linear-gradient(180deg,rgba(91,75,255,0.04),#fff_38%)]"}`}>
             <Game
               key={requestKey}
               rounds={session.rounds}

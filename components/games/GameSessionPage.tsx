@@ -57,7 +57,7 @@ function SessionContent({ forcedGame }: { forcedGame?: string }) {
 export default function GameSessionPage({ forcedGame }: { forcedGame?: string }) {
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-slate-50 text-ink flex flex-col">
+      <div className="min-h-screen canvas text-ink flex flex-col">
         <Navbar />
         <main className="flex-1">
           <Suspense

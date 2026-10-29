@@ -26,7 +26,7 @@ export default function DifficultyBadge({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white font-medium text-slate-700 ${sizeClass}`}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-slate-200 bg-white font-medium text-slate-700 ${sizeClass}`}
     >
       <span className={`w-1.5 h-1.5 rounded-full ${tone.solid}`} />
       <span>{item.label}</span>
