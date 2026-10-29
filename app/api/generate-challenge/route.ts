@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateAIChallenge } from "@/lib/ai";
 import { ChallengeCategory, ChallengeDifficulty, UserType } from "@/lib/types";
+import { isGameId } from "@/lib/games/catalog";
+import { generateGame } from "@/lib/games/generate";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
+    const validDifficulties: ChallengeDifficulty[] = ["easy", "medium", "hard", "expert"];
+
+    // Interactive games: build a validated puzzle session server-side
+    if (isGameId(body.gameId)) {
+      const difficulty: ChallengeDifficulty = validDifficulties.includes(body.difficulty) ? body.difficulty : "medium";
+      const seed = Number.isInteger(body.seed) ? body.seed : Math.floor(Math.random() * 2 ** 31);
+      return NextResponse.json(generateGame(body.gameId, difficulty, seed));
+    }
+
     const validCategories: ChallengeCategory[] = [
       "mystery",
       "business",
@@ -21,7 +32,6 @@ export async function POST(req: NextRequest) {
       "kids_creative",
       "kids_word",
     ];
-    const validDifficulties: ChallengeDifficulty[] = ["easy", "medium", "hard", "expert"];
 
     const category: ChallengeCategory = validCategories.includes(body.category)
       ? body.category

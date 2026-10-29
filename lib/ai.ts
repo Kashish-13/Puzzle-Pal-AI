@@ -5,9 +5,13 @@ import {
   ReasoningEvaluation,
   UserType,
 } from "./types";
+import type { GameId, GameResult } from "./games/types";
+import { GAMES } from "./games/catalog";
+import { formatDuration, scoreGame } from "./games/scoring";
 
 // Curated high-caliber offline fallback challenges across all Student and Kids categories
-const FALLBACK_CHALLENGES: Record<ChallengeCategory, Record<ChallengeDifficulty, Challenge>> = {
+// Legacy text-challenge categories only (interactive games are generated in lib/games)
+const FALLBACK_CHALLENGES: Record<Exclude<ChallengeCategory, GameId>, Record<ChallengeDifficulty, Challenge>> = {
   // ================= STUDENT & CORE CATEGORIES =================
   business: {
     easy: {
@@ -1111,7 +1115,8 @@ export function getFallbackChallenge(
   category: ChallengeCategory,
   difficulty: ChallengeDifficulty
 ): Challenge {
-  const catChallenges = FALLBACK_CHALLENGES[category] || FALLBACK_CHALLENGES.business;
+  const catChallenges =
+    FALLBACK_CHALLENGES[category as keyof typeof FALLBACK_CHALLENGES] || FALLBACK_CHALLENGES.business;
   const challenge = catChallenges[difficulty] || catChallenges.medium;
   return {
     ...challenge,
@@ -1706,4 +1711,58 @@ Return JSON:
     challenge.hint ||
     "Consider the second-order consequences of each alternative before committing to a decision."
   );
+}
+
+/**
+ * Reviews an interactive game session. The score is always computed from measured
+ * performance (accuracy, mistakes, time, hints); the AI only writes the review text.
+ */
+export async function evaluateGamePerformance(result: GameResult): Promise<ReasoningEvaluation> {
+  const base = scoreGame(result);
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey || apiKey.trim() === "" || apiKey.includes("your_")) return base;
+
+  const def = GAMES[result.gameId];
+  const audience = def.mode === "kids" ? "a child aged 8-14 (warm, simple words, encouraging)" : "a student or young professional (concise, analytical)";
+
+  try {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey.trim()}` },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        temperature: 0.4,
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "system",
+            content: `You are PuzzlePal AI's reasoning coach. Review a completed puzzle session for ${audience}.
+Game: "${def.name}" — ${def.description} Core skill: ${def.skill}.
+Never change or restate a different score. Do not use emojis. Be specific to this game's skill.
+Return JSON: { "strengths": ["string", "string"], "improvements": ["string"], "feedback": "1-2 sentences", "idealApproach": "one concrete strategy for next time" }`,
+          },
+          {
+            role: "user",
+            content: `Difficulty: ${result.difficulty}. Correct: ${result.correct}/${result.total}. Wrong attempts: ${result.mistakes}. Time: ${formatDuration(result.timeMs)}. Hints used: ${result.hintsUsed}. Score: ${base.overallScore}/10.`,
+          },
+        ],
+      }),
+    });
+    if (!res.ok) return base;
+    const data = await res.json();
+    const parsed = JSON.parse(data.choices?.[0]?.message?.content || "{}");
+    const strings = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string" && x.trim() !== "") : []);
+    const strengths = strings(parsed.strengths);
+    const improvements = strings(parsed.improvements);
+    return {
+      ...base,
+      strengths: strengths.length ? strengths.slice(0, 3) : base.strengths,
+      improvements: improvements.length ? improvements.slice(0, 2) : base.improvements,
+      feedback: typeof parsed.feedback === "string" && parsed.feedback.trim() ? parsed.feedback : base.feedback,
+      idealApproach: typeof parsed.idealApproach === "string" && parsed.idealApproach.trim() ? parsed.idealApproach : base.idealApproach,
+    };
+  } catch (err) {
+    console.warn("Game review generation failed, using rule-based review:", err);
+    return base;
+  }
 }

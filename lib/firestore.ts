@@ -12,6 +12,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "./firebase";
+import { GAMES, KIDS_GAMES, STUDENT_GAMES, ALL_GAME_IDS } from "./games/catalog";
 import {
   ChallengeCategory,
   ChallengeDifficulty,
@@ -139,27 +140,27 @@ export const CATEGORY_INFO: Record<
     preview: "Decode secret messages and build clever word bridges.",
     audience: "kids",
   },
+
+  // Interactive games — the current library
+  ...(Object.fromEntries(
+    ALL_GAME_IDS.map((id) => [
+      id,
+      {
+        name: GAMES[id].name,
+        icon: "game",
+        description: GAMES[id].description,
+        preview: GAMES[id].tagline,
+        audience: GAMES[id].mode,
+      },
+    ])
+  ) as Record<(typeof ALL_GAME_IDS)[number], { name: string; icon: string; description: string; preview: string; audience: "student" | "kids" | "all" }>),
 };
 
-export const STUDENT_CATEGORIES: ChallengeCategory[] = [
-  "business",
-  "technical",
-  "data",
-  "logic",
-  "mystery",
-  "decision",
-  "aptitude",
-  "word",
-];
+// Categories offered to each mode. Older text-challenge categories remain in
+// CATEGORY_INFO only so past history records still display correctly.
+export const STUDENT_CATEGORIES: ChallengeCategory[] = [...STUDENT_GAMES];
 
-export const KIDS_CATEGORIES: ChallengeCategory[] = [
-  "kids_mystery",
-  "kids_brain_teaser",
-  "kids_pattern",
-  "kids_math",
-  "kids_creative",
-  "kids_word",
-];
+export const KIDS_CATEGORIES: ChallengeCategory[] = [...KIDS_GAMES];
 
 export const AVAILABLE_BADGES: Badge[] = [
   {
